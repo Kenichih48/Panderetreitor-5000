@@ -3,18 +3,17 @@ import re
 import codecs
 import os
 import sys
-
 from pip._vendor.distlib.compat import raw_input
 
 
 reservadas = ['NEGATE', 'MTRUE', 'MFALSE', 'ABANICO', 'VERTICAL', 'PERCUTOR', 'GOLPE',
-              'VIBRATO', 'METRONOMO', 'PRINTLN', 'FOR', 'IF', 'ENCASO', 'DEF',
-              'EXEC', 'TO', 'STEP']
+              'VIBRATO', 'METRONOMO', 'PRINTLN', 'FOR', 'IF', 'ENCASO', 'SINO', 'FINENCASO', 'DEF',
+              'EXEC', 'TO', 'STEP', 'ENTONS', 'RUTINE', 'CUANDO', 'PRINCIPAL']
 
 tokens = reservadas + ['NEWLINE', 'ID', 'SET', 'NUMBER', 'BOOL', 'COMMA', 'SEMICOLON',
                        'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EXPONENT', 'WDIVIDE',
-                       'MODULE', 'LPARENTHESES', 'RPARENTHESES', 'LBRACKET', 'RBRACKET', 'TEXT',
-                       'EQUAL', 'GT', 'GTE', 'LT', 'LTE']
+                       'MODULE', 'LPARENTHESES', 'RPARENTHESES', 'LBRACKET', 'RBRACKET', 'STRING',
+                       'EQUAL', 'GT', 'GTE', 'LT', 'LTE', 'SPACE']
 
 t_ignore = '\t '
 t_BOOL = r'(True|False)'
@@ -36,8 +35,30 @@ t_GT = r'>'
 t_GTE = r'>='
 t_LT = r'<'
 t_LTE = r'<='
-t_TEXT = r'"[\w\W\s\S\d]*"'
-
+t_STRING = r'"[\w\W\s\S\d]*"'
+t_ENCASO = r'EnCaso'
+t_SINO = r'SiNo'
+t_FINENCASO = r'Fin-EnCaso'
+t_CUANDO = r'Cuando'
+t_ENTONS = r'EnTons'
+t_SET = r'SET'
+t_NEGATE = r'\.Neg'
+t_MTRUE = r'\.T'
+t_MFALSE = r'\.F'
+t_DEF = r'Def'
+t_EXEC = r'Exec'
+t_PRINTLN = r'println!'
+t_TO = r'to'
+t_FOR = r'For'
+t_STEP = r'Step'
+t_IF = r'If'
+t_PRINCIPAL = r'Principal\(\)'
+t_ABANICO = r'Abanico\((A|B)\)'
+t_VERTICAL = r'Vertical\((D|I)\)'
+t_PERCUTOR = r'Percutor\((D|I|DI|A|B|AB)\)'
+t_GOLPE = r'Golpe\(\)'
+t_VIBRATO = r'Vibrato\(\d+\)'
+t_METRONOMO = r'Metronomo\((A|B),\d+.*(\d+)*\)|Metronomo\((A|B),\s\d+.*(\d+)*\)'
 
 def t_ID(t):
     r'\@[a-zA-Z0-9\?\_]{2,9}'
@@ -47,126 +68,61 @@ def t_ID(t):
 
     return t
 
-def t_ABANICO(t):
-    r'Abanico\((A|B)\)'
-    t.value = t.value[len(t.value)-2]
+#def t_ABANICO(t):
+#    r'Abanico\((A|B)\)'
+#    t.value = t.value[len(t.value)-2]
+#
+#    return t
 
-    return t
+#def t_VERTICAL(t):
+#    r'Vertical\((D|I)\)'
+#    t.value = t.value[len(t.value)-2]
+#
+#    return t
 
-def t_VERTICAL(t):
-    r'Vertical\((D|I)\)'
-    t.value = t.value[len(t.value)-2]
+#def t_PERCUTOR(t):
+#    r'Percutor\((D|I|DI|A|B|AB)\)'
+#    if len(t.value) != 11:
+#        t.value = t.value[len(t.value)-3] + t.value[len(t.value)-2]
+#    else:
+#        t.value = t.value[len(t.value)-2]
+#
+#    return t
 
-    return t
+#def t_GOLPE(t):
+#    r'Golpe\(\)'
+#    t.value = ''
+#
+#    return t
 
-def t_PERCUTOR(t):
-    r'Percutor\((D|I|DI|A|B|AB)\)'
-    if len(t.value) != 11:
-        t.value = t.value[len(t.value)-3] + t.value[len(t.value)-2]
-    else:
-        t.value = t.value[len(t.value)-2]
+#def t_VIBRATO(t):
+#    r'Vibrato\(\d+\)'
+#    value = ''
+#    for n in range(8, len(t.value)-1):
+#        value += t.value[n]
+#    t.value = int(value)
+#    return t
 
-    return t
+#def t_METRONOMO(t):
+#    r'Metronomo\((A|B),\d+.*(\d+)*\)|Metronomo\((A|B),\s\d+.*(\d+)*\)'
+#    start = t.value.find("(") + 1
+#    end = t.value.find(")")
+#    value = t.value[start:end]
+#    state = value[0]
+#    if value[2] == ' ':
+#        seconds = float(value[3:len(value)])
+#    else:
+#        seconds = float(value[2:len(value)])
+#
+#    value1 = [state, seconds]
+#    t.value = value1
 
-def t_GOLPE(t):
-    r'Golpe\(\)'
-    t.value = ''
-
-    return t
-
-def t_VIBRATO(t):
-    r'Vibrato\(\d+\)'
-    value = ''
-    for n in range(8, len(t.value)-1):
-        value += t.value[n]
-    t.value = int(value)
-    return t
-
-def t_METRONOMO(t):
-    r'Metronomo\((A|B),\d+.*(\d+)*\)|Metronomo\((A|B),\s\d+.*(\d+)*\)'
-    start = t.value.find("(") + 1
-    end = t.value.find(")")
-    value = t.value[start:end]
-    state = value[0]
-    if value[2] == ' ':
-        seconds = float(value[3:len(value)])
-    else:
-        seconds = float(value[2:len(value)])
-
-    value1 = [state, seconds]
-    t.value = value1
-
-    return t
+#    return t
 
 def t_NEWLINE(t):
     r'\n+'
-    #t.lexer.lineno += len(t.value)
-    t.value = ''
-
-    return t
-
-def t_SET(t):
-    r'SET'
-    t.value = ''
-
-    return t
-
-def t_NEGATE(t):
-    r'\.Neg'
-    t.value = ''
-
-    return t
-
-def t_MTRUE(t):
-    r'\.T'
-    t.value = ''
-
-    return t
-
-def t_MFALSE(t):
-    r'\.F'
-    t.value = ''
-
-    return t
-
-def t_DEF(t):
-    r'Def'
-    t.value = ''
-
-    return t
-
-def t_EXEC(t):
-    r'Exec'
-    t.value = ''
-
-    return t
-
-def t_PRINTLN(t):
-    r'println!'
-    t.value = ''
-
-    return t
-
-def t_TO(t):
-    r'to'
-    t.value = ''
-
-    return t
-
-def t_FOR(t):
-    r'For'
-    t.value = ''
-
-    return t
-
-def t_STEP(t):
-    r'Step'
-    t.value = ''
-
-    return t
-
-def t_IF(t):
-    r'If'
+    t.lexer.lineno += len(t.value)
+    #t.lexer.lexpos = 0
     t.value = ''
 
     return t
@@ -180,7 +136,6 @@ def t_NUMBER(t):
     r'\d+'
     t.value = int(t.value)
     return t
-
 
 def t_error(t):
     print("caracter ilegal '%s'" % t.value[0])
@@ -221,10 +176,15 @@ cadena = fp.read()
 fp.close()
 
 analizador = lex()
-
 analizador.input(cadena)
+#contador = 0
 
 while True:
     tok = analizador.token()
     if not tok: break
+    #if contador == tok.lexpos - 1: print('space')
+    #else: print('no space')
+    #print('contador: ' + str(contador) + ', lexpos: ' + str(tok.lexpos - 1))
+    #contador = len(str(tok.value)) + tok.lexpos
+
     print(tok)
