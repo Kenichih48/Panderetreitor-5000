@@ -1,4 +1,4 @@
-import ply.lex as lex
+from ply.lex import lex as lex
 import re
 import codecs
 import os
@@ -212,14 +212,15 @@ def buscarFicheros(directorio):
     return files[int(numArchivo) - 1]
 
 
-directorio = "C:/Users/quigo/AndroidStudioProjects/TareaExtraclase42/Tambarduine/Pruebas/"
+#directorio = "C:/Users/quigo/AndroidStudioProjects/TareaExtraclase42/Tambarduine/Pruebas/"
+directorio = "/home/kash/Documents/GitHub/Tambarduine/Pruebas/"
 archivo = buscarFicheros(directorio)
 test = directorio + archivo
 fp = codecs.open(test, "r", "utf-8")
 cadena = fp.read()
 fp.close()
 
-analizador = lex.lex()
+analizador = lex()
 
 analizador.input(cadena)
 
