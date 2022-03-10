@@ -1,5 +1,6 @@
-SET @variable, True;
 SET @variable2, 1234;
+SET @variable, True;
+@variable + @variable2
 Vibrato(2345789);
 Abanico(B);
 Vertical(I)
@@ -9,7 +10,9 @@ Metronomo(B, 0.25);
 println!("Hello World!?@#%^*()", 2022);
 For @asd_123?a to 10 Step 1;
 If @12as34 == True;
-Def @asdfasd();
+Def @asdfasd() {
+    SET @variable3, 123456789
+};
 Exec @asdfasd();
 #Esto es un comentario;
 EnCaso

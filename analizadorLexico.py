@@ -8,12 +8,12 @@ from pip._vendor.distlib.compat import raw_input
 
 reservadas = ['NEGATE', 'MTRUE', 'MFALSE', 'ABANICO', 'VERTICAL', 'PERCUTOR', 'GOLPE',
               'VIBRATO', 'METRONOMO', 'PRINTLN', 'FOR', 'IF', 'ENCASO', 'SINO', 'FINENCASO', 'DEF',
-              'EXEC', 'TO', 'STEP', 'ENTONS', 'RUTINE', 'CUANDO', 'PRINCIPAL']
+              'EXEC', 'TO', 'STEP', 'ENTONS', 'CUANDO', 'PRINCIPAL']
 
-tokens = reservadas + ['NEWLINE', 'ID', 'SET', 'NUMBER', 'BOOL', 'COMMA', 'SEMICOLON',
+tokens = reservadas + ['ID', 'SET', 'NUMBER', 'BOOL', 'COMMA', 'SEMICOLON',
                        'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EXPONENT', 'WDIVIDE',
                        'MODULE', 'LPARENTHESES', 'RPARENTHESES', 'LBRACKET', 'RBRACKET', 'STRING',
-                       'EQUAL', 'GT', 'GTE', 'LT', 'LTE', 'SPACE']
+                       'EQUAL', 'NEQUAL', 'GT', 'GTE', 'LT', 'LTE']
 
 t_ignore = '\t '
 t_BOOL = r'(True|False)'
@@ -31,6 +31,7 @@ t_RPARENTHESES = r'\)'
 t_LBRACKET = r'\{'
 t_RBRACKET = r'\}'
 t_EQUAL = r'=='
+t_NEQUAL = r'\!='
 t_GT = r'>'
 t_GTE = r'>='
 t_LT = r'<'
@@ -119,17 +120,17 @@ def t_ID(t):
 
 #    return t
 
-def t_NEWLINE(t):
+def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
     #t.lexer.lexpos = 0
-    t.value = ''
+    #t.value = ''
 
-    return t
+    #return t
 
 def t_COMMENT(t):
     r'\#.*'
-    print('comment written ' + t.value)
+    #print('comment written ' + t.value)
     pass
 
 def t_NUMBER(t):
@@ -162,12 +163,10 @@ def buscarFicheros(directorio):
                 respuesta = True
                 break
 
-    print("Has escogido \"%s\" \n" % files[int(numArchivo) - 1])
-
     return files[int(numArchivo) - 1]
 
 
-#directorio = "C:/Users/quigo/AndroidStudioProjects/TareaExtraclase42/Tambarduine/Pruebas/"
+directorio = "C:/Users/quigo/AndroidStudioProjects/TareaExtraclase42/Tambarduine/Pruebas/"
 directorio = "/home/kash/Documents/GitHub/Tambarduine/Pruebas/"
 archivo = buscarFicheros(directorio)
 test = directorio + archivo
