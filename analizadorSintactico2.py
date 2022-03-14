@@ -20,9 +20,7 @@ rutinas = {}
 
 def p_bloques(t):
     '''bloques : declaracion
-                | movimientos
-                | operBool
-                | sentencia
+                | procedimiento
     '''
     print('bloque')
 
@@ -61,35 +59,64 @@ def p_declaracion_variables(t):
             pass
     print(nombres)
 
-def p_sentencias(t):
-    '''sentencia : FOR ID TO expresion STEP expresion LBRACKET RBRACKET SEMICOLON
-                    | FOR ID TO ID STEP expresion LBRACKET RBRACKET SEMICOLON
+def p_procedimientos(t):
+    '''procedimiento : sentencia
+                        | movimientos
+                        | operBool
+                        | creacionRutinas
+                        | correrRutinas
     '''
-    print(t[2])
-    print(t[4])
-    print(t[6])
+    print('procedimientos')
+
+def p_creacion_rutinas(t):
+    '''creacionRutinas : DEF ID LPARENTHESES RPARENTHESES LBRACKET bloques RBRACKET SEMICOLON
+                        | DEF ID LPARENTHESES expresion RPARENTHESES LBRACKET bloques RBRACKET SEMICOLON
+                        | DEF ID LPARENTHESES listExpresion RPARENTHESES LBRACKET bloques RBRACKET SEMICOLON
+    '''
+    print('creacion rutinas')
+
+def p_correr_rutinas(t):
+    '''correrRutinas : EXEC ID LPARENTHESES RPARENTHESES LBRACKET SEMICOLON
+                        | EXEC ID LPARENTHESES expresion RPARENTHESES SEMICOLON
+                        | EXEC ID LPARENTHESES listExpresion RPARENTHESES SEMICOLON
+    '''
+    print('correr rutinas')
+
+def p_sentencias(t):
+    '''sentencia : FOR ID TO expresion STEP expresion LBRACKET bloques RBRACKET SEMICOLON
+                    | FOR ID TO ID STEP expresion LBRACKET bloques RBRACKET SEMICOLON
+    '''
+    if  not(bool(nombres)):
+        nombres[t[2]] = [1,'num']
+    else:
+        for key in nombres.keys():
+            if key == t[2]:
+                break
+        else:
+            nombres[t[2]] = [1,'num']
+
     for key, value in nombres.items():
         for key2, value2 in nombres.items():
-            print(key, key2)
-            print(value, value2)
             if key == t[2] and value[1] == 'num' and key2 != t[4]:
                 for x in range(value[0],int(t[4]) + 1,int(t[6])):
                     print(x)
+                break
             elif key == t[2] and key2 == t[4] and value[1] == 'num' and value2[1] == 'num':
-                for x in range(value[0], value2[0], int(t[6])):
+                for x in range(value[0], value2[0] + 1, int(t[6])):
                     print(x)
-            elif key2 == t[2] and key == t[4] and value[1] == 'num' and value2[1] == 'num':
-                for x in range(value2[0], value[0], int(t[6])):
-                    print(x)
-            else:
+                break
+            elif (key == t[2] and value[1] == 'bool') or (key2 == t[4] and value2[1] == 'bool'):
                 print('A variable used is not a number')#.format(t.lineno))
-                pass
-            #elif (key == t[2] or key2 == t[2]) and 
+                break
     print('sentencia For')
         
 def p_sentencia2(t):
     'sentencia : IF condicion LBRACKET RBRACKET SEMICOLON'
-    print(t)
+    if t[2] == True:
+        print('True, can run block')
+    else:
+        print('False, can\'t run block')
+
     print('sentencia If')
 
 def p_condiciones(t):
@@ -134,6 +161,11 @@ def p_expresion_operaciones(t):
 def p_expresion_uminus(t):
     'expresion : MINUS expresion'
     t[0] = -t[2]
+
+def p_list_expresiones(t):
+    '''listExpresion : expresion COMMA expresion
+                        | listExpresion COMMA expresion
+    '''
 
 def p_expresion_operaciones_booleanas(t):
     'operBool : SET ID NEGATE SEMICOLON'
