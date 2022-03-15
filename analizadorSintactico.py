@@ -6,6 +6,8 @@ from sys import stdin
 from analizadorLexico import tokens
 from pip._vendor.distlib.compat import raw_input
 
+nombres = {}
+
 precedence = (
 	('right','ID','PRINCIPAL','IF'),
 	('left','NEQUAL', 'EQUAL'),
@@ -14,207 +16,225 @@ precedence = (
 	('left','TIMES','DIVIDE'),
 	('left','LPARENTHESES','RPARENTHESES')	
 )
+def p_bloques(t):
+    '''bloques : declaracion
+                | procedimiento
+    '''
+    print('bloque')
 
-def p_program(p):
-    'program : block'
-    print('program')
-    #p[0] = program(p[1], 'program')
+def p_declaracion_variables(t):
+    '''declaracion : SET ID COMMA expresion SEMICOLON
+                    | SET ID COMMA expresionB SEMICOLON
+    '''
+    seguir = True
+    if  not(bool(nombres)):
+        if t[4] == ("True" or "False"):
+            nombres[t[2]] = [t[4],'bool']
+        else:
+            nombres[t[2]] = [t[4],'num']
+    else:
+        for key, value in nombres.items():
+            if key == t[2]:
+                if t[4] != ("True" and "False") and value[1] == 'bool':
+                    print("Variable {} is boolean and new value is a number".format(t[2]))
+                    seguir = False
+                    pass
+                elif value[1] == 'num':
+                    try:
+                        int(t[4])
+                    except:
+                        print("Variable {} is a number and new value is boolean".format(t[2]))
+                        seguir = False
+                        pass
+                    else:
+                        pass
 
-def p_block(p):
-    'block : varDecl procDecl statement'
-    print('block')
+        if t[4] == ("True" and "False") and seguir:
+            nombres[t[2]] = [t[4],'bool']
+            pass
+        elif seguir:
+            nombres[t[2]] = [t[4],'num']
+            pass
+    print('creacion de variable')
+    #print(nombres)
 
-def p_varDecl(p):
-    '''varDecl : SET ID COMMA BOOL SEMICOLON'''
-    #p[0] = varDecl()
-    print('varDeclBool')
+def p_procedimientos(t):
+    '''procedimiento : sentencia
+                        | movimientos
+                        | operBool
+                        | creacionRutinas
+                        | correrRutinas
+    '''
+    print('procedimientos')
 
-#def p_varDecl2(p):
-#    '''varDecl : SET ID COMMA NUMBER SEMICOLON'''
-#    print('varDeclNumber')    
+def p_creacion_rutinas(t):
+    '''creacionRutinas : DEF ID LPARENTHESES RPARENTHESES LBRACKET bloques RBRACKET SEMICOLON
+                        | DEF ID LPARENTHESES expresion RPARENTHESES LBRACKET bloques RBRACKET SEMICOLON
+                        | DEF ID LPARENTHESES listExpresion RPARENTHESES LBRACKET bloques RBRACKET SEMICOLON
+    '''
+    print('creacion rutinas')
 
-def p_varDeclEmpty(p):
-    '''varDecl : empty'''
-    print('nulo')
+def p_correr_rutinas(t):
+    '''correrRutinas : EXEC ID LPARENTHESES RPARENTHESES LBRACKET SEMICOLON
+                        | EXEC ID LPARENTHESES expresion RPARENTHESES SEMICOLON
+                        | EXEC ID LPARENTHESES listExpresion RPARENTHESES SEMICOLON
+    '''
+    print('correr rutinas')
 
-def p_procDecl(p):
-    '''procDecl : procDecl PERCUTOR SEMICOLON'''
-    print('procDecl5')
+def p_sentencias(t):
+    '''sentencia : FOR ID TO expresion STEP expresion LBRACKET bloques RBRACKET SEMICOLON
+                    | FOR ID TO ID STEP expresion LBRACKET bloques RBRACKET SEMICOLON
+    '''
+    #if  not(bool(nombres)):
+    #    nombres[t[2]] = [1,'num']
+    #else:
+    #    for key in nombres.keys():
+    #        if key == t[2]:
+    #            break
+    #    else:
+    #        nombres[t[2]] = [1,'num']
 
-def p_procDecl2(p):
-    '''procDecl : procDecl GOLPE SEMICOLON'''
-    print('procDecl6')
+    #for key, value in nombres.items():
+    #    for key2, value2 in nombres.items():
+    #        if key == t[2] and value[1] == 'num' and key2 != t[4]:
+    #            for x in range(value[0],int(t[4]) + 1,int(t[6])):
+    #                print(x)
+    #            break
+    #        elif key == t[2] and key2 == t[4] and value[1] == 'num' and value2[1] == 'num':
+    #            for x in range(value[0], value2[0] + 1, int(t[6])):
+    #                print(x)
+    #            break
+    #        elif (key == t[2] and value[1] == 'bool') or (key2 == t[4] and value2[1] == 'bool'):
+    #            print('A variable used is not a number')#.format(t.lineno))
+    #            break
+    print('sentencia For')
+        
+def p_sentencia2(t):
+    'sentencia : IF condicion LBRACKET declaracion RBRACKET SEMICOLON'
+    #if t[2] == True:
+    #    print('True, can run block')
+    #else:
+    #    print('False, can\'t run block')
+    print('sentencia If')
 
-def p_procDecl3(p):
-    '''procDecl : procDecl VIBRATO SEMICOLON'''
-    print('procDecl7')
+def p_condiciones(t):
+    '''
+    condicion : expresion LT expresion
+                | expresion GT expresion
+                | expresion LTE expresion
+                | expresion GTE expresion
+                | expresion EQUAL expresion
+                | expresion NEQUAL expresion
+    '''
+    if t[2] == "<": t[0] = t[1] < t[3]
+    elif t[2] == ">": t[0] = t[1] > t[3]
+    elif t[2] == "<=": t[0] = t[1] <= t[3]
+    elif t[2] == ">=": t[0] = t[1] >= t[3]
+    elif t[2] == "==": t[0] = t[1] is t[3]
+    elif t[2] == "!=": t[0] = t[1] != t[3]
 
-def p_procDecl4(p):
-    '''procDecl : procDecl METRONOMO SEMICOLON'''
-    print('procDecl8')
+def p_expresion_operaciones(t):
+    '''
+    expresion : expresion PLUS expresion
+                | expresion MINUS expresion
+                | expresion TIMES expresion
+                | expresion DIVIDE expresion
+                | expresion EXPONENT expresion
+                | expresion MODULE expresion
+                | expresion WDIVIDE expresion
+    '''
+    if t[2] == '+': t[0] = t[1]+t[3]
+    elif t[2] == '-': t[0] = t[1] - t[3]
+    elif t[2] == '*': t[0] = t[1] * t[3]
+    elif t[2] == '/': t[0] = t[1] / t[3]
+    elif t[2] == '%': t[0] = t[1] % t[3]
+    elif t[2] == '//': t[0] == t[1] // t[3]
+    elif t[2] == '**':
+        i = t[3]
+        t[0] = t[1]
+        while i > 1:
+            t[0] *= t[1]
+            i -= 1
+    
+def p_expresion_uminus(t):
+    'expresion : MINUS expresion'
+    t[0] = -t[2]
 
-def p_procDecl5(p):
-    '''procDecl : procDecl PRINTLN LPARENTHESES print RPARENTHESES SEMICOLON'''
-    print('procDecl9')
+def p_list_expresiones(t):
+    '''listExpresion : expresion COMMA expresion
+                        | listExpresion COMMA expresion
+    '''
 
-def p_procDecl6(p):
-    '''procDecl : procDecl ENCASO sentenciaCondicional SINO block FINENCASO SEMICOLON'''
-    print('procDecl10')
+def p_expresion_operaciones_booleanas(t):
+    'operBool : SET ID NEGATE SEMICOLON'
+    #for key, value in nombres.items():
+    #    if key == t[2] and value[1] != 'bool':
+    #        print('Las operaciones booleanas no pueden usarse en numeros')
+    #    elif key != t[2]:
+    #        print('La variable por negar no existe')
+    #    elif key == t[2] and value[0] == 'True':
+    #        value[0] = 'False'
+    #    elif key == t[2] and value[0] == 'False':
+    #        value[0] = 'True'
+    #print(nombres)
+    print('OperBool Negate')
 
-def p_procDecl7(p):
-    '''procDecl : procDecl PRINCIPAL LPARENTHESES RPARENTHESES'''
-    print('procDecl11')
+def p_expresion_operaciones_booleanas2(t):
+    'operBool : SET ID MTRUE SEMICOLON'
+    #for key, value in nombres.items():
+    #    if key == t[2] and value[1] != 'bool':
+    #        print('Las operaciones booleanas no pueden usarse en numeros')
+    #    elif key != t[2]:
+    #        print('La variable por negar no existe')
+    #    elif key == t[2] and value[0] == 'True':
+    #        pass
+    #    elif key == t[2] and value[0] == 'False':
+    #        value[0] = 'True'
+    #print(nombres)
+    print('Make True')
 
-def p_procDeclEmpty(p):
-    '''procDecl : empty'''
-    print('nulo')
+def p_expresion_operaciones_booleanas3(t):
+    'operBool : SET ID MFALSE SEMICOLON'
+    #for key, value in nombres.items():
+    #    if key == t[2] and value[1] != 'bool':
+    #        print('Las operaciones booleanas no pueden usarse en numeros')
+    #    elif key != t[2]:
+    #        print('La variable por negar no existe')
+    #    elif key == t[2] and value[0] == 'True':
+    #       value[0] = 'False'
+    #    elif key == t[2] and value[0] == 'False':
+    #        pass
+    #print(nombres)
+    print('Make False')
 
-def p_sentenciaCondicional(p):
-    '''sentenciaCondicional : CUANDO statementSC ENTONS LBRACKET block RBRACKET'''
-    print('sentenciaCondicional')
+def p_expresion_movimientos(t):
+    '''movimientos : ABANICO SEMICOLON
+                    | VERTICAL SEMICOLON
+                    | PERCUTOR SEMICOLON
+                    | GOLPE SEMICOLON
+                    | VIBRATO SEMICOLON
+                    | METRONOMO SEMICOLON
+    '''
+    print('movimientos')
 
-def p_statementSC(p):
-    '''statementSC : IF condition'''
+def p_expresion_numero(t):
+    'expresion : NUMBER'
+    t[0] = t[1]
 
-def p_sentenciaCondicionalEmpty(p):
-    '''sentenciaCondicional : empty'''
-    print('nulo')
+def p_expresion_numero2(t):
+    'expresion : LPARENTHESES expresion RPARENTHESES'
 
-def p_statement(p):
-    '''statement : IF condition LBRACKET block RBRACKET SEMICOLON'''
-    print('statement1')
+def p_expresion_bool(t):
+    'expresionB : BOOL'
+    t[0] = t[1]
 
-def p_statement2(p):
-    '''statement : FOR ID TO ID STEP NUMBER LBRACKET block RBRACKET SEMICOLON'''
-    print('statement2')
-
-def p_statement3(p):
-    '''statement : FOR ID TO NUMBER STEP NUMBER LBRACKET block RBRACKET SEMICOLON'''
-    print('statement3')
-
-def p_statementEmpty(p):
-    '''statement : empty'''
-    print('nulo')
-
-def p_condition(p):
-    '''condition : expression relation expression'''
-    print('condition1')
-
-def p_condition2(p):
-    '''condition : ID NEGATE'''
-    print('condition2')
-
-def p_condition3(p):
-    '''condition : ID MTRUE'''
-    print('condition3')
-
-def p_condition4(p):
-    '''condition : ID MFALSE'''
-    print('condition4')
-
-def p_relation(p):
-    '''relation : EQUAL'''
-    print('relation1')
-
-def p_relation2(p):
-    '''relation : NEQUAL'''
-    print('relation2')
-
-def p_relation3(p):
-    '''relation : LT'''
-    print('relation3')
-
-def p_relation4(p):
-    '''relation : GT'''
-    print('relation4')
-
-def p_relation5(p):
-    '''relation : LTE'''
-    print('relation5')
-
-def p_relation6(p):
-    '''relation : GTE'''
-    print('relation6')
-
-def p_expression(p):
-    '''expression : term'''
-    print('expression1')
-
-def p_expression2(p):
-    '''expression : addingOperator term'''
-    print('expression2')
-
-def p_expression3(p):
-    '''expression : expression addingOperator term'''
-    print('expression3')
-
-def p_addingOperator(p):
-    '''addingOperator : PLUS'''
-    print("addingOperator1")
-
-def p_addingOperator2(p):
-    '''addingOperator : MINUS'''
-    print("addingOperator2")
-
-def p_term(p):
-    '''term : factor'''
-    print('term1')
-
-def p_term2(p):
-    '''term : term multiplyingOperator factor'''
-    print('term2')
-
-def p_multiplyingOperator(p):
-    '''multiplyingOperator : TIMES'''
-    print('multiplyingOperator1')
-
-def p_multiplyingOperator2(p):
-    '''multiplyingOperator : DIVIDE'''
-    print('multiplyingOperator2')
-
-def p_multiplyingOperator3(p):
-    '''multiplyingOperator : EXPONENT'''
-    print('multiplyingOperator2')
-
-def p_multiplyingOperator4(p):
-    '''multiplyingOperator : WDIVIDE'''
-    print('multiplyingOperator3')
-
-def p_multiplyingOperator5(p):
-    '''multiplyingOperator : MODULE'''
-    print('multiplyingOperator4')
-
-def p_factor(p):
-    '''factor : ID'''
-    print('factor1')
-
-def p_factor2(p):
-    '''factor : NUMBER'''
-    print('factor2')
-
-def p_factor3(p):
-    '''factor : LPARENTHESES expression RPARENTHESES'''
-    print('factor3')
-
-def p_print(p):
-    '''print : STRING'''
-    print('print1')
-
-def p_print2(p):
-    '''print : factor'''
-    print('print2')
-
-def p_parameters(p):
-    '''parameters : factor'''
-    print('parameters')
-
-def p_parameters2(p):
-    '''parameters : BOOL'''
-    print('parameters2')
-
-def p_empty(p):
-    'empty :'
-    pass
+def p_expresion_nombre(t):
+    'expresion : ID'
+    try:
+        t[0] = nombres[t[1]]
+    except LookupError:
+        print('Nombre desconocido', t[1])
+        t[0] = 0
 
 def p_error(p):
     print('Error de sintaxis ', p)#, 'en la linea ' + str(p.lineno))
@@ -249,6 +269,7 @@ test = directorio + archivo
 fp = codecs.open(test, "r", "utf-8")
 cadena = fp.read()
 fp.close()
+print()
 
 parser = yacc()
 result = parser.parse(cadena)

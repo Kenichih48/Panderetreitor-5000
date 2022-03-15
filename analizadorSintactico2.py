@@ -86,37 +86,36 @@ def p_sentencias(t):
     '''sentencia : FOR ID TO expresion STEP expresion LBRACKET bloques RBRACKET SEMICOLON
                     | FOR ID TO ID STEP expresion LBRACKET bloques RBRACKET SEMICOLON
     '''
-    if  not(bool(nombres)):
-        nombres[t[2]] = [1,'num']
-    else:
-        for key in nombres.keys():
-            if key == t[2]:
-                break
-        else:
-            nombres[t[2]] = [1,'num']
+    #if  not(bool(nombres)):
+    #    nombres[t[2]] = [1,'num']
+    #else:
+    #    for key in nombres.keys():
+    #        if key == t[2]:
+    #            break
+    #    else:
+    #        nombres[t[2]] = [1,'num']
 
-    for key, value in nombres.items():
-        for key2, value2 in nombres.items():
-            if key == t[2] and value[1] == 'num' and key2 != t[4]:
-                for x in range(value[0],int(t[4]) + 1,int(t[6])):
-                    print(x)
-                break
-            elif key == t[2] and key2 == t[4] and value[1] == 'num' and value2[1] == 'num':
-                for x in range(value[0], value2[0] + 1, int(t[6])):
-                    print(x)
-                break
-            elif (key == t[2] and value[1] == 'bool') or (key2 == t[4] and value2[1] == 'bool'):
-                print('A variable used is not a number')#.format(t.lineno))
-                break
+    #for key, value in nombres.items():
+    #    for key2, value2 in nombres.items():
+    #        if key == t[2] and value[1] == 'num' and key2 != t[4]:
+    #            for x in range(value[0],int(t[4]) + 1,int(t[6])):
+    #                print(x)
+    #            break
+    #        elif key == t[2] and key2 == t[4] and value[1] == 'num' and value2[1] == 'num':
+    #            for x in range(value[0], value2[0] + 1, int(t[6])):
+    #                print(x)
+    #            break
+    #        elif (key == t[2] and value[1] == 'bool') or (key2 == t[4] and value2[1] == 'bool'):
+    #            print('A variable used is not a number')#.format(t.lineno))
+    #            break
     print('sentencia For')
         
 def p_sentencia2(t):
-    'sentencia : IF condicion LBRACKET RBRACKET SEMICOLON'
-    if t[2] == True:
-        print('True, can run block')
-    else:
-        print('False, can\'t run block')
-
+    'sentencia : IF condicion LBRACKET bloques RBRACKET SEMICOLON'
+    #if t[2] == True:
+    #    print('True, can run block')
+    #else:
+    #    print('False, can\'t run block')
     print('sentencia If')
 
 def p_condiciones(t):
@@ -169,42 +168,45 @@ def p_list_expresiones(t):
 
 def p_expresion_operaciones_booleanas(t):
     'operBool : SET ID NEGATE SEMICOLON'
-    for key, value in nombres.items():
-        if key == t[2] and value[1] != 'bool':
-            print('Las operaciones booleanas no pueden usarse en numeros')
-        elif key != t[2]:
-            print('La variable por negar no existe')
-        elif key == t[2] and value[0] == 'True':
-            value[0] = 'False'
-        elif key == t[2] and value[0] == 'False':
-            value[0] = 'True'
-    print(nombres)
+    #for key, value in nombres.items():
+    #    if key == t[2] and value[1] != 'bool':
+    #        print('Las operaciones booleanas no pueden usarse en numeros')
+    #    elif key != t[2]:
+    #        print('La variable por negar no existe')
+    #    elif key == t[2] and value[0] == 'True':
+    #        value[0] = 'False'
+    #    elif key == t[2] and value[0] == 'False':
+    #        value[0] = 'True'
+    #print(nombres)
+    print('OperBool Negate')
 
 def p_expresion_operaciones_booleanas2(t):
     'operBool : SET ID MTRUE SEMICOLON'
-    for key, value in nombres.items():
-        if key == t[2] and value[1] != 'bool':
-            print('Las operaciones booleanas no pueden usarse en numeros')
-        elif key != t[2]:
-            print('La variable por negar no existe')
-        elif key == t[2] and value[0] == 'True':
-            pass
-        elif key == t[2] and value[0] == 'False':
-            value[0] = 'True'
-    print(nombres)
+    #for key, value in nombres.items():
+    #    if key == t[2] and value[1] != 'bool':
+    #        print('Las operaciones booleanas no pueden usarse en numeros')
+    #    elif key != t[2]:
+    #        print('La variable por negar no existe')
+    #    elif key == t[2] and value[0] == 'True':
+    #        pass
+    #    elif key == t[2] and value[0] == 'False':
+    #        value[0] = 'True'
+    #print(nombres)
+    print('Make True')
 
 def p_expresion_operaciones_booleanas3(t):
     'operBool : SET ID MFALSE SEMICOLON'
-    for key, value in nombres.items():
-        if key == t[2] and value[1] != 'bool':
-            print('Las operaciones booleanas no pueden usarse en numeros')
-        elif key != t[2]:
-            print('La variable por negar no existe')
-        elif key == t[2] and value[0] == 'True':
-            value[0] = 'False'
-        elif key == t[2] and value[0] == 'False':
-            pass
-    print(nombres)
+    #for key, value in nombres.items():
+    #    if key == t[2] and value[1] != 'bool':
+    #        print('Las operaciones booleanas no pueden usarse en numeros')
+    #    elif key != t[2]:
+    #        print('La variable por negar no existe')
+    #    elif key == t[2] and value[0] == 'True':
+    #       value[0] = 'False'
+    #    elif key == t[2] and value[0] == 'False':
+    #        pass
+    #print(nombres)
+    print('Make False')
 
 def p_expresion_movimientos(t):
     '''movimientos : ABANICO SEMICOLON

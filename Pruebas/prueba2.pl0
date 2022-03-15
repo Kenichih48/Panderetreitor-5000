@@ -1,2 +1,5 @@
-SET @1234, 1234;
-2 * 10
+SET @asdf, True;
+
+If 12 > 4 {
+    SET @zxcv, 12;
+};
