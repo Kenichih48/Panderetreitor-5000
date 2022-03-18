@@ -65,21 +65,29 @@ def save_as():
             file.write(code)
 
 
-canvas = Canvas(root, yscrollcommand=scrollbar.set)
+def multipleview(*args):
+    text_info.yview(*args)
+    text_lineNum.yview(*args)
+
+canvas = Canvas(root)
 canvas.pack(fill = X)
-scrollbar.config(command=canvas.yview)
 
 
-text_info = Text(canvas)
+text_scroll = Scrollbar(canvas)
+text_scroll.pack(side=RIGHT, fill = BOTH)
+
+
+text_info = Text(canvas, yscrollcommand = text_scroll.set, wrap="none")
 text_info.config(bg='#362f2e', fg='#d2ded1', insertbackground='white')
 text_info.pack(fill=BOTH, side = RIGHT, expand= True)
 
 
-
-text_lineNum = Text(canvas, width=2)
+text_lineNum = Text(canvas, width=2, yscrollcommand = text_scroll.set, wrap="none")
 text_lineNum.config(bg='#362f2e', fg='#d2ded1', insertbackground='white')
 text_lineNum.pack(fill=BOTH, side = LEFT)
 
+
+text_scroll.config(command=multipleview)
 
 
 text_output = Text(root, height=7)
