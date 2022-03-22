@@ -38,24 +38,24 @@ void setup() {
   Serial.begin(9600);
  
 
+  servoEje2.attach(11);
   servoEje1.attach(3);
-  servoEje2.attach(4);
-  servoGolpe1.attach(6);
-  servoGolpe2.attach(7);
-  servoGolpe3.attach(8);
-  servoGolpe4.attach(5);
-  servoGolpe5.attach(11);
+  servoGolpe1.attach(4);
+  servoGolpe2.attach(5);
+  servoGolpe3.attach(7);
+  servoGolpe4.attach(8);
+  servoGolpe5.attach(6);
   
   EasyBuzzer.setPin(9);
   
   
   servoEje1.write(90);
   servoEje2.write(90);
-  servoGolpe1.write(0);
-  servoGolpe2.write(0);
-  servoGolpe3.write(0);
-  servoGolpe4.write(0);
-  servoGolpe5.write(0);
+  servoGolpe1.write(90);
+  servoGolpe2.write(90);
+  servoGolpe3.write(90);
+  servoGolpe4.write(90);
+  servoGolpe5.write(90);
   
   digitalWrite(ledPin, LOW); 
   
@@ -89,6 +89,8 @@ void checkMessages(){
 
 
   }
+
+  delay(20);
 
 
 }
@@ -124,7 +126,7 @@ void MessageProcessor(String message){
 }
 
 void metronomo(){
-
+   
   if (metroMode && movement != ""){
     digitalWrite(ledPin, HIGH);
     EasyBuzzer.beep(freq1);
@@ -142,7 +144,10 @@ void metronomo(){
   }else{
     digitalWrite(ledPin, LOW);
     EasyBuzzer.stopBeep();
+    
   }
+
+  
   
 }
 
