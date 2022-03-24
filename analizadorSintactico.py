@@ -1,4 +1,5 @@
-from ply.yacc import yacc as yacc
+#import ply.yacc as yacc
+from ply.yacc import yacc
 import re
 import codecs
 import os
@@ -9,13 +10,17 @@ from pip._vendor.distlib.compat import raw_input
 nombres = {}
 
 precedence = (
-	('right','ID','PRINCIPAL','IF'),
-	('left','NEQUAL', 'EQUAL'),
-	('left','LT','LTE','GT','GTE'),
-	('left','PLUS','MINUS'),
-	('left','TIMES','DIVIDE'),
-	('left','LPARENTHESES','RPARENTHESES')	
-)
+   ('right','ID','IF'),
+   ('right','DEF', 'EXEC'),
+   ('right', 'SET'),
+   ('left','NEQUAL','EQUAL'),
+   ('left','LT','LTE','GT','GTE'),
+   ('left','PLUS','MINUS'),
+   ('left','TIMES','DIVIDE','WDIVIDE'),
+   ('left','EXPONENT'),
+   ('left','LPARENTHENSES','RPARENTHESES'),
+   )
+
 def p_bloques(t):
     '''bloques : declaracion
                 | procedimiento
@@ -26,36 +31,36 @@ def p_declaracion_variables(t):
     '''declaracion : SET ID COMMA expresion SEMICOLON
                     | SET ID COMMA expresionB SEMICOLON
     '''
-    seguir = True
-    if  not(bool(nombres)):
-        if t[4] == ("True" or "False"):
-            nombres[t[2]] = [t[4],'bool']
-        else:
-            nombres[t[2]] = [t[4],'num']
-    else:
-        for key, value in nombres.items():
-            if key == t[2]:
-                if t[4] != ("True" and "False") and value[1] == 'bool':
-                    print("Variable {} is boolean and new value is a number".format(t[2]))
-                    seguir = False
-                    pass
-                elif value[1] == 'num':
-                    try:
-                        int(t[4])
-                    except:
-                        print("Variable {} is a number and new value is boolean".format(t[2]))
-                        seguir = False
-                        pass
-                    else:
-                        pass
-
-        if t[4] == ("True" and "False") and seguir:
-            nombres[t[2]] = [t[4],'bool']
-            pass
-        elif seguir:
-            nombres[t[2]] = [t[4],'num']
-            pass
-    print('creacion de variable')
+    #seguir = True
+    #if  not(bool(nombres)):
+    #    if t[4] == ("True" or "False"):
+    #        nombres[t[2]] = [t[4],'bool']
+    #    else:
+    #        nombres[t[2]] = [t[4],'num']
+    #else:
+    #    for key, value in nombres.items():
+    #        if key == t[2]:
+    #            if t[4] != ("True" and "False") and value[1] == 'bool':
+    #                print("Variable {} is boolean and new value is a number".format(t[2]))
+    #                seguir = False
+    #                pass
+    #            elif value[1] == 'num':
+    #                try:
+    #                    int(t[4])
+    #                except:
+    #                    print("Variable {} is a number and new value is boolean".format(t[2]))
+    #                    seguir = False
+    #                    pass
+    #                else:
+    #                    pass
+    #
+    #    if t[4] == ("True" and "False") and seguir:
+    #        nombres[t[2]] = [t[4],'bool']
+    #        pass
+    #    elif seguir:
+    #        nombres[t[2]] = [t[4],'num']
+    #        pass
+    print('declaracion')
     #print(nombres)
 
 def p_procedimientos(t):
@@ -126,12 +131,12 @@ def p_condiciones(t):
                 | expresion EQUAL expresion
                 | expresion NEQUAL expresion
     '''
-    if t[2] == "<": t[0] = t[1] < t[3]
-    elif t[2] == ">": t[0] = t[1] > t[3]
-    elif t[2] == "<=": t[0] = t[1] <= t[3]
-    elif t[2] == ">=": t[0] = t[1] >= t[3]
-    elif t[2] == "==": t[0] = t[1] is t[3]
-    elif t[2] == "!=": t[0] = t[1] != t[3]
+    #if t[2] == "<": t[0] = t[1] < t[3]
+    #elif t[2] == ">": t[0] = t[1] > t[3]
+    #elif t[2] == "<=": t[0] = t[1] <= t[3]
+    #elif t[2] == ">=": t[0] = t[1] >= t[3]
+    #elif t[2] == "==": t[0] = t[1] is t[3]
+    #elif t[2] == "!=": t[0] = t[1] != t[3]
 
 def p_expresion_operaciones(t):
     '''
@@ -156,9 +161,9 @@ def p_expresion_operaciones(t):
             t[0] *= t[1]
             i -= 1
     
-def p_expresion_uminus(t):
-    'expresion : MINUS expresion'
-    t[0] = -t[2]
+#def p_expresion_uminus(t):
+#    'expresion : MINUS expresion'
+#    t[0] = -t[2]
 
 def p_list_expresiones(t):
     '''listExpresion : expresion COMMA expresion
@@ -221,8 +226,8 @@ def p_expresion_numero(t):
     'expresion : NUMBER'
     t[0] = t[1]
 
-def p_expresion_numero2(t):
-    'expresion : LPARENTHESES expresion RPARENTHESES'
+#def p_expresion_numero2(t):
+#    'expresion : LPARENTHESES expresion RPARENTHESES'
 
 def p_expresion_bool(t):
     'expresionB : BOOL'
@@ -230,14 +235,19 @@ def p_expresion_bool(t):
 
 def p_expresion_nombre(t):
     'expresion : ID'
-    try:
-        t[0] = nombres[t[1]]
-    except LookupError:
-        print('Nombre desconocido', t[1])
-        t[0] = 0
+    #try:
+    #    t[0] = nombres[t[1]]
+    #except LookupError:
+    #    print('Nombre desconocido', t[1])
+    #    t[0] = 0
 
 def p_error(p):
-    print('Error de sintaxis ', p)#, 'en la linea ' + str(p.lineno))
+    if p:
+        print('Error de sintaxis ', p.type)#, 'en la linea ' + str(p.lineno))
+        #parser.errork()
+    else:
+        print('Syntax error at EOF')
+    
 
 def buscarFicheros(directorio):
     ficheros = []
@@ -273,5 +283,4 @@ print()
 
 parser = yacc()
 result = parser.parse(cadena)
-
 print (result)

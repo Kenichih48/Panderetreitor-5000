@@ -1,5 +1,5 @@
-SET @asdf, True;
-
-If 12 > 4 {
-    SET @zxcv, 12;
-};
+If @Variable == 5 {Percutor(A);}; 
+If 1 + 2 == 3 {SET @x12.Neg;};
+If @Var1 * 2 == 6 {Golpe();}; 
+If @Var1 == True {println!("Hola Mundo");};
+If True {SET @Variable, 12;};

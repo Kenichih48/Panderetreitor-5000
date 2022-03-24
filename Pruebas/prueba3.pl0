@@ -1,0 +1,8 @@
+If @Var1 * 2 == 6 { 
+    Golpe(); 
+    SET @asdf, 2;
+};
+
+If @Var2 == 3 {
+    Golpe();
+}
