@@ -11,6 +11,7 @@ precedence = (
    ('right','DEF', 'EXEC'),
    ('right', 'SET'),
    ('right', 'LBRACKET', 'RBRACKET'),
+   ('left','PRINTLN'),
    ('left','NEQUAL','EQUAL'),
    ('left','LT','LTE','GT','GTE'),
    ('left','PLUS','MINUS'),
@@ -21,12 +22,16 @@ precedence = (
    )
 
 def p_program(p):
-	'''program : block'''
+	'''program : blockList'''
 	print ("program")
 
 def p_block(p):
 	'''block : varDecl moveDecl procDecl statementDecl'''
 	print ("block")
+
+#def p_blockEmpty(p):
+#    '''block : empty'''
+#    print('nulo')
 
 def p_blockList1(p):
     '''blockList : block'''
@@ -35,6 +40,9 @@ def p_blockList1(p):
 def p_blockList2(p):
     '''blockList : blockList block'''
     print ("blockList 2")
+
+#def p_blockListEmpty(p):
+#    '''blockList : empty'''
 
 def p_varDecl1(p):
     '''varDecl : varDeclList SEMICOLON'''
@@ -45,20 +53,16 @@ def p_varDeclEmpty(p):
 	print ("nulo")
 
 def p_varDeclSt1(p):
-	'''varDeclSt : SET ID COMMA BOOL'''
+	'''varDeclSt : SET ID COMMA factor'''
 	print ("varDeclSt 1")
 
 def p_varDeclSt2(p):
-	'''varDeclSt : SET ID COMMA NUMBER'''
-	print ("varDeclSt 2")
+    '''varDeclSt : SET ID COMMA arithOperationList'''
+    print ("varDeclSt 2")
 
 def p_varDeclSt3(p):
-    '''varDeclSt : SET ID COMMA arithOperationList'''
-    print ("varDeclSt 3")
-
-def p_varDeclSt4(p):
     '''varDeclSt : SET ID boolOperation'''
-    print ("varDeclSt 4")
+    print ("varDeclSt 3")
 
 def p_varDeclList1(p):
     '''varDeclList : varDeclSt'''
@@ -161,12 +165,28 @@ def p_moveDeclSt6(p):
     print('moveDeclSt 6')
 
 def p_procDecl1(p):
-	'''procDecl : procDecl PRINTLN LPARENTHESES toPrint RPARENTHESES SEMICOLON'''
+	'''procDecl : procDeclList SEMICOLON''' #PRINTLN LPARENTHESES toPrint RPARENTHESES
 	print ("procDecl 1")
 
 def p_procDeclEmpty(p):
 	'''procDecl : empty'''
 	print ("nulo")
+
+def p_procDeclList1(p):
+    '''procDeclList : procDeclSt'''
+    print('procDeclList 1')
+
+def p_procDeclList2(p):
+    '''procDeclList : procDeclList SEMICOLON procDeclSt'''
+    print('procDeclList 2')
+
+def p_procDeclSt1(p):
+    '''procDeclSt : PRINTLN LPARENTHESES toPrint RPARENTHESES'''
+    print('procDeclSt 1')
+
+#def p_procDeclSt2(p):
+#    '''procDeclSt : PRINTLN LPARENTHESES toPrint RPARENTHESES'''
+#    print('procDeclSt 1')
 
 def p_statementDecl1(p):
     '''statementDecl : statementList SEMICOLON'''
@@ -181,8 +201,24 @@ def p_statement1(p):
 	print ("statement 1")
 
 def p_statement2(p):
-	'''statement : FOR ID TO factor STEP NUMBER LBRACKET blockList RBRACKET'''
+	'''statement : IF condition LBRACKET blockList RBRACKET ELSE LBRACKET blockList RBRACKET'''
 	print ("statement 2")
+
+def p_statement3(p):
+	'''statement : FOR ID TO factor STEP NUMBER LBRACKET blockList RBRACKET'''
+	print ("statement 3")
+
+def p_statement4(p):
+    '''statement : FOR ID TO factor LBRACKET blockList RBRACKET'''
+    print ("statement 4")
+
+def p_statement4(p):
+    '''statement : ENCASO cuandoEntonsList SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
+    print ("statement 4")
+
+def p_statement5(p):
+    '''statement : ENCASO ID cuandoEntonsListAux SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
+    print ("statement 5")
 
 def p_statementList1(p):
 	'''statementList : statement'''
@@ -191,6 +227,30 @@ def p_statementList1(p):
 def p_statementList2(p):
 	'''statementList : statementList SEMICOLON statement'''
 	print ("statementList 2")
+
+def p_cuandoEntonsList1(p):
+    '''cuandoEntonsList : cuandoEntons'''
+    print ("cuandoEntonsList 1")
+
+def p_cuandoEntonsList2(p):
+    '''cuandoEntonsList : cuandoEntonsList SEMICOLON cuandoEntons'''
+    print ("cuandoEntonsList 2")
+
+def p_cuandoEntons1(p):
+    '''cuandoEntons : CUANDO ID relation factor ENTONS LBRACKET blockList RBRACKET'''
+    print ("cuandoEntons 1")
+
+def p_cuandoEntonsAux1(p):
+    '''cuandoEntonsAux : CUANDO relation factor ENTONS LBRACKET blockList RBRACKET'''
+    print ("cuandoEntons 1")
+
+def p_cuandoEntonsListAux1(p):
+    '''cuandoEntonsListAux : cuandoEntonsAux'''
+    print ("cuandoEntonsList 1")
+
+def p_cuandoEntonsListAux2(p):
+    '''cuandoEntonsListAux : cuandoEntonsListAux SEMICOLON cuandoEntonsAux'''
+    print ("cuandoEntonsList 2")    
 
 def p_condition1(p):
 	'''condition : arithOperation relation arithOperation'''
@@ -209,7 +269,7 @@ def p_condition4(p):
 	print ("condition 4")
 
 def p_condition5(p):
-    '''condition : BOOL'''
+    '''condition : factor'''
     print ("condition 5")
 
 def p_relation1(p):
@@ -295,6 +355,10 @@ def p_factor2(p):
 def p_factor3(p):
 	'''factor : LPARENTHESES arithOperation RPARENTHESES'''
 	print ("factor 3")
+
+def p_factor4(p):
+    '''factor : BOOL'''
+    print ("factor 4")
 
 def p_empty(p):
 	'''empty :'''
