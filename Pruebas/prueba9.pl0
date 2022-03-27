@@ -1,0 +1,4 @@
+SET @id, True;
+SET @id.Neg;
+SET @id.T;
+SET @id.F;

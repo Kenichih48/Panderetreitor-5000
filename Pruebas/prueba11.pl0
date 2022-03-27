@@ -1,0 +1,2 @@
+SET @curso, 3;
+println!("Este es el proyecto numero ", @curso, " de Compiladores ", 2022);

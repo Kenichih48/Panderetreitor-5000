@@ -1,0 +1,12 @@
+Def @MiRutina2() {
+    SET @x1, 4;
+};
+
+If @Var1 * 2 == 6 {
+    Golpe();
+};
+
+Def @MiRutina (@dato1) {
+    SET @x2, True;
+    Exec @MiRutina2();
+};

@@ -1,0 +1,13 @@
+SET @x1, 3;
+For @var1 to @x1 Step 1 {
+    println!("Valor: ", @var1);
+};
+SET @x1, 3;
+SET @Var1, 2;
+For @Var1 to @x1 Step 1 {
+    println!("Valor: ", @Var1);
+};
+SET @Var1, 10;
+For @Var1 to 5 Step 2 {
+    println!("Valor: ", @Var1);
+};

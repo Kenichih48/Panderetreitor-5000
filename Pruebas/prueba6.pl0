@@ -1,0 +1,31 @@
+EnCaso
+    Cuando @abc >= 3 EnTons {
+        Golpe();
+    };
+    Cuando @abc >= 3 EnTons {
+        Percutor(A);
+    };
+    Cuando @abc >= 3 EnTons {
+        Vibrato(12);
+    };
+SiNo {
+    Metronomo(A, 0.25);
+};
+Fin-EnCaso;
+
+SET @asdf, True;
+
+EnCaso
+    Cuando @abc >= 3 EnTons {
+        Golpe();
+    };
+    Cuando @abc >= 3 EnTons {
+        Percutor(A);
+    };
+    Cuando @abc >= 3 EnTons {
+        Vibrato(12);
+    };
+SiNo {
+    Metronomo(A, 0.25);
+};
+Fin-EnCaso;

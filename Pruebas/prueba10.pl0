@@ -1,0 +1,13 @@
+Metronomo(A, 1/2);
+Abanico(A);
+Abanico(B);
+Vertical(D);
+Vertical(I);
+Percutor(D);
+Percutor(I);
+Percutor(DI);
+Percutor(A);
+Percutor(B);
+Percutor(AB);
+Golpe();
+Vibrato(5);
