@@ -1,8 +1,5 @@
 SET @x12, 5;
-SET @y32, 9;
-SET @bnm, @x12 + @y32 * 10 / 4;
-SET @bac, ((@x12 + @y32) * 10) / 4;
-
-SET @asdf, 5-6;
-
-SET @asdf2, -@asdf;
+SET @var, 9;
+SET @var1, 8;
+SET @bnm, @x12 + @var1 * 10 / 4;
+SET @bac, ((@x12 + @var1) * 10) / 4;

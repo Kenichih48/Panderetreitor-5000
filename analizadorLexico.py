@@ -13,7 +13,7 @@ reservadas = ['NEGATE', 'MTRUE', 'MFALSE', 'ABANICO', 'VERTICAL', 'PERCUTOR', 'G
 tokens = reservadas + ['ID', 'SET', 'NUMBER', 'BOOL', 'COMMA', 'SEMICOLON',
                        'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EXPONENT', 'WDIVIDE',
                        'MODULE', 'LPARENTHESES', 'RPARENTHESES', 'LBRACKET', 'RBRACKET', 'STRING',
-                       'EQUAL', 'NEQUAL', 'GT', 'GTE', 'LT', 'LTE', 'TYPE']
+                       'EQUAL', 'NEQUAL', 'GT', 'GTE', 'LT', 'LTE', 'TYPE', 'ELSE']
 
 t_ignore = '\t '
 t_BOOL = r'(True|False)'
@@ -36,7 +36,7 @@ t_GT = r'>'
 t_GTE = r'>='
 t_LT = r'<'
 t_LTE = r'<='
-t_STRING = r'"[\w\W\s\S\d]*"'
+t_STRING = r'"[\w\s\d]*"'
 t_ENCASO = r'EnCaso'
 t_SINO = r'SiNo'
 t_FINENCASO = r'Fin-EnCaso'
@@ -53,6 +53,7 @@ t_TO = r'to'
 t_FOR = r'For'
 t_STEP = r'Step'
 t_IF = r'If'
+t_ELSE = r'Else'
 t_TYPE = r'type'
 t_PRINCIPAL = r'Principal\(\)'
 t_ABANICO = r'Abanico\((A|B)\)'

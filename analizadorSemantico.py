@@ -2,7 +2,8 @@ import re
 variables = {}
 moves = []
 metronomoOn = False
-
+printParameters = ''
+        
 class varDeclaration:
     def __init__(self, id, value_):
         check = True
@@ -37,18 +38,19 @@ class varDeclaration:
 
 def arithOperation(operation):
     newOper = operation
+
+    variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', newOper)
+
     for key, value in variables.items():
-        #print("Key: " + str(key) + " Value: " + str(value) + " Operation: " + newOper)
-        
-        if (newOper.find(key)) != -1 and value[1] == 'num':
-            newOper = newOper.replace(str(key), str(value[0]))
-            
-        elif ((newOper.find('True')) != -1) or ((newOper.find('False')) != -1):
-            print("Error semantico, no se pueden hacer operaciones aritmeticas con booleanos")
-        elif ((newOper.find(key)) != -1) and value[1] == 'bool':
-            print("Error semantico, no se pueden hacer operaciones aritmeticas con booleanos 2")
-        elif (newOper.find(key)) == -1:
-            pass
+        for var in variable:
+            if key == var and value[1] == 'num':
+                newOper = newOper.replace(var, value[0])
+            elif ((newOper.find('True')) != -1) or ((newOper.find('False')) != -1):
+                print("Error semantico, no se pueden hacer operaciones aritmeticas con booleanos")
+            elif key == var and value[1] == 'bool':
+                print("Error semantico, no se pueden hacer operaciones aritmeticas con booleanos 2")
+            elif key == var:
+                pass
 
     for element in newOper:
         if element == '@':
@@ -156,34 +158,66 @@ def isNum(num):
     else:
         return True
 
-def toPrint(parameters):
-    print('parameters: ' + str(parameters))
+def toPrint():
+    global printParameters
 
-    newPar = parameters
-    for key, value in variables.items():
-        #print("Key: " + str(key) + " Value: " + str(value) + " Operation: " + newOper)
-        if (newPar.find(key)) != -1:
-            newPar = newPar.replace(str(key), str(value[0]))
-        elif (newPar.find(key)) == -1:
-            pass
+    print(printParameters)
+
+    printParameters = ''
+
+def addPrintPar(string):
+    global printParameters
+
+    newStr = string
+
+    newStr = newStr.strip("\"")
+    printParameters += newStr
     
-    parameterList = newPar.split(',')[1::2]
-    print("New parameter: " + str(parameterList))
+    return newStr
 
-    newPar = ''
+def addPrintPar2(variable):
+    global printParameters
 
-    for element in parameterList:
-        print("Element: \'" + element + "\'")
-        if element.startswith("\"") and element.endswith("\""):
-            element = element.strip("\"")
-            newPar += element
-        elif element.find('@') != -1:
+    for key, value in variables.items():
+        if key == variable:
+            variable = variable.replace(str(key), str(value[0]))
+        elif key != variable:
+            pass
+
+    if not(isNum(variable)) and variable.find('@') != -1:
+        print("Error semantico, la variable por imprimir no ha sido definida")
+    else:
+        printParameters += str(variable)
+
+    return str(variable)
+
+def conditionVerifier(condition):
+    variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', condition)
+
+    for key, value in variables.items():
+        for var in variable:
+            if key == var:
+                #print("Condition: " + str(condition) + ", Key: " + str(key) + ", Value: " + str(value[0]))
+                condition = condition.replace(str(key), str(value[0]))
+            elif key != var:
+                pass
+
+    #print("Condition: " + str(condition))
+
+    for element in condition:
+        if element == '@':
             print("Error semantico, la variable por imprimir no ha sido definida")
-            break
-        elif isNum(element):
-            newPar += element
+    else:
+        return eval(condition)    
 
-    print(newPar)
+def ifVerifier(condition):
+    print(str(conditionVerifier(condition)))
+    #print(moves)
+    #if conditionVerifier(condition):
+    #    print(conditionVerifier)
+
+
+
 
 
 

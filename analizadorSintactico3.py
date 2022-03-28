@@ -201,12 +201,12 @@ def p_statementDeclEmpty(p):
 	#print ("nulo")
 
 def p_statement1(p):
-	'''statement : IF condition LBRACKET blockList RBRACKET'''
-	#print ("statement 1")
+    '''statement : IF condition LBRACKET blockList RBRACKET'''
+    p[0] = ifVerifier(p[2])
 
 def p_statement2(p):
-	'''statement : IF condition LBRACKET blockList RBRACKET ELSE LBRACKET blockList RBRACKET'''
-	#print ("statement 2")
+    '''statement : IF condition LBRACKET blockList RBRACKET ELSE LBRACKET blockList RBRACKET'''
+    p[0] = ifVerifier(p[2])
 
 def p_statement3(p):
 	'''statement : FOR ID TO factor STEP NUMBER LBRACKET blockList RBRACKET'''
@@ -349,7 +349,7 @@ def p_factor1(p):
 
 def p_factor2(p):
     '''factor : NUMBER'''
-    p[0] = p[1]
+    p[0] = str(p[1])
 
 def p_factor3(p):
     '''factor : LPARENTHESES arithOperation RPARENTHESES'''

@@ -1,16 +1,19 @@
+SET @Var, 5;
 If @Var == 5 {
     Percutor(A);
 }; 
 
 If 1 + 2 == 3 {
-    SET @x12.Neg;
+    Percutor(B);
 };
 
+SET @Var1, 3;
 If @Var1 * 2 == 6 {
     Golpe();
 }; 
 
-If @Var1 == True {
+SET @Var2, True;
+If @Var2 == True {
     println!("Hola Mundo");
 };
 

@@ -1,8 +1,10 @@
-If @Var1 * 2 == 6 { 
-    Golpe(); 
-    SET @asdf, 2;
+SET @Var1, 3;
+Metronomo(A, 1/2);
+If @Var1 * 2 == True { 
+    Vibrato(2);
 };
 
+SET @Var2, 3;
 If @Var2 == 3 {
-    Golpe();
+    Vibrato(2);
 };
