@@ -1,14 +1,18 @@
+SET @abc, 4;
+
 EnCaso @abc
-    Cuando >= 3 EnTons {
+    Cuando <= 3 EnTons {
         Golpe();
-    };
-    Cuando >= 3 EnTons {
+        Golpe();
         Percutor(A);
     };
-    Cuando >= 3 EnTons {
+    Cuando <= 3 EnTons {
+        Percutor(A);
+    };
+    Cuando <= 3 EnTons {
         Vibrato(12);
     };
 SiNo {
-    Metronomo(A, 0.25);
+    Golpe();
 };
 Fin-EnCaso;

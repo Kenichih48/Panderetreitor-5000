@@ -1,13 +1,18 @@
+SET @x2, True;
 SET @x1, 3;
 For @var1 to @x1 Step 1 {
-    println!("Valor: ", @var1);
+    SET @x3, @var1;
 };
-SET @x1, 3;
-SET @Var1, 2;
-For @Var1 to @x1 Step 1 {
-    println!("Valor: ", @Var1);
+
+For @var1 to 2 Step 1 {
+    Golpe();
 };
-SET @Var1, 10;
-For @Var1 to 5 Step 2 {
-    println!("Valor: ", @Var1);
+
+For @var2 to 4 {
+    Abanico(B);
+};
+
+SET @var6, 3;
+For @var6 to 9 Step 3 {
+    Vertical(D);
 };

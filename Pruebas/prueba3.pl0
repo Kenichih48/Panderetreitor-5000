@@ -1,10 +1,11 @@
-SET @Var1, 3;
-Metronomo(A, 1/2);
-If @Var1 * 2 == True { 
-    Vibrato(2);
+Golpe();
+If 3 * 2 == True { 
+    Golpe();
 };
 
-SET @Var2, 3;
-If @Var2 == 3 {
-    Vibrato(2);
+If 3 > 3 {
+    Abanico(A);
+}
+Else {
+    Abanico(B);
 };

@@ -1,12 +1,14 @@
-SET @asdf, 2;
+SET @Var1, 3;
 Golpe();
+
 If @Var1 * 2 == 6 {
     Golpe();
     SET @asdf, 2;
 };
-SET @asdf, 2;
+
 If @Var1 * 2 == 6 {
     Golpe();
     SET @asdf, 2;
 };
+
 SET @asdf, 2;
