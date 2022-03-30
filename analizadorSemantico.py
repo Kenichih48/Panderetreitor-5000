@@ -1,8 +1,20 @@
 import re
 variables = {}
 moves = []
-metronomoOn = False
+metronomoOn = True
 printParameters = ''
+printList = []
+cuandoEntonsList = []
+defRutinas = []
+
+def returnVariables():
+    return variables
+
+def returnMoves():
+    return moves
+
+def returnPrintList():
+    return printList
         
 class varDeclaration:
     def __init__(self, id, value_):
@@ -36,6 +48,9 @@ class varDeclaration:
 
         print(variables)
 
+    def returnVariable(self):
+        return 'SET' + self.name
+
 def arithOperation(operation):
     newOper = operation
 
@@ -60,6 +75,7 @@ def arithOperation(operation):
 
 def boolOperation(id, operation):
     for key, value in variables.items():
+        tempValue = value[0]
         if key == id and value[1] == 'bool' and operation == '.Neg':
             if value[0] == 'True':
                 value[0] = 'False'
@@ -72,6 +88,8 @@ def boolOperation(id, operation):
         elif key == id and value[1] == 'num':
             print("Error semantico, no se pueden hacer operaciones booleanas con numeros")
     print(variables)
+
+    return 'bool' + id + operation + '&' + tempValue
 
 def Metronomo(movimiento):
 
@@ -92,10 +110,16 @@ def Metronomo(movimiento):
     if movimiento[0] == 'A':
         metronomoOn = True
         moves.append('M' + str(movimiento[1]))
+        return 'move' + 'M' + str(movimiento[1])
 
     elif movimiento[0] == 'D':
         metronomoOn = False
+        moves.append('P')
         print('Metronomo is not activated')
+        return 'move' + 'P'
+        
+
+    print(moves)
 
 def Abanico(movimiento):
     movimiento = movimiento[len(movimiento)-2]
@@ -104,7 +128,9 @@ def Abanico(movimiento):
     else:
         print('Metronomo is not activated')
 
-    #print(movimiento)
+    #print(moves)
+
+    return 'move' + movimiento
 
 def Vertical(movimiento):
     movimiento = movimiento[len(movimiento)-2]
@@ -113,7 +139,7 @@ def Vertical(movimiento):
     else:
         print('Metronomo is not activated')
 
-    #print(movimiento)
+    return 'move' + movimiento
 
 def Percutor(movimiento):
     if len(movimiento) != 11:
@@ -121,34 +147,42 @@ def Percutor(movimiento):
     else:
         movimiento = movimiento[len(movimiento)-2]
 
+    movimiento = movimiento.replace('D', 'R')
+    movimiento = movimiento.replace('I', 'L')
+    movimiento = movimiento.replace('A', 'O')
+    movimiento = movimiento.replace('B', 'U')
+
     if metronomoOn:
         moves.append(movimiento)
     else:
         print('Metronomo is not activated')
 
-    #print(movimiento)
+    return 'move' + movimiento
 
 def Golpe(movimiento):
-    
+    movimiento = 'G'
     if metronomoOn:
         moves.append(movimiento)
     else:
         print('Metronomo is not activated')
+
+    print(moves)
+
+    return 'move' + movimiento
 
 def Vibrato(movimiento):
     value = ''
     for n in range(8, len(movimiento)-1):
         value += movimiento[n]
     movimiento = int(value)
-    todo = ''
+    todo = 'DI'
     if metronomoOn:
-        for i in range(movimiento):
-            todo += 'A'
+        todo = todo * movimiento
         moves.append(todo)
     else:
         print('Metronomo is not activated')
 
-    print(moves)
+    return 'move' + todo
 
 def isNum(num):
     try:
@@ -159,11 +193,15 @@ def isNum(num):
         return True
 
 def toPrint():
-    global printParameters
-
+    global printParameters, printList
+    
+    printList.append(printParameters)
     print(printParameters)
 
+    printParametersTemp = printParameters
     printParameters = ''
+
+    return 'print' + printParametersTemp
 
 def addPrintPar(string):
     global printParameters
@@ -210,127 +248,567 @@ def conditionVerifier(condition):
     else:
         return eval(condition)    
 
-def ifVerifier(condition):
-    print(str(conditionVerifier(condition)))
-    #print(moves)
-    #if conditionVerifier(condition):
-    #    print(conditionVerifier)
+def ifVerifier(condition, block, block2):
+    #print(str(conditionVerifier(condition)))
+    checkBlock2 = True
+    block = block.replace(";", ",")
+    block = block.split(",")
+    try:
+        block2 = block2.replace(";", ",")
+        block2 = block2.split(",")
+    except:
+        checkBlock2 = False
+
+    for i in block:
+        if i == 'None':
+            block.remove(i)
+    try:
+        block.remove('None')
+    except:
+        pass
+
+    if checkBlock2:
+        for i in block2:
+            if i == 'None':
+                block2.remove(i)
+        try:
+            block2.remove('None')
+        except:
+            pass
 
 
+    #print('Block: ' + str(block))
+
+    if not(conditionVerifier(condition)):
+        print('--Entered if is false--')
+        for i in block:
+            if i.startswith('SET'):
+                i = i.replace('SET', '')
+                for key, value in variables.items():
+                    if key == i:
+                        variables.pop(i)
+                        break
+
+                print(variables)
+
+            elif i.startswith('bool'):
+                i = i.replace('bool', '')
+                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', i)
+                #print('Variable: ' + str(variable))
+                variableTemp = variable[0]
+                i = i[len(variableTemp):len(i)]
+                i = i.split('&')
+                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                for key, value in variables.items():
+                    if key == variableTemp:
+                        if i[0] == '.Neg' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.Neg' and value[0] == 'False':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'True' and value[0] == 'True':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'False' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'False' and value[0] == 'False':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
+                            value[0] = 'True'
+                print('Variables after if is false: ' + str(variables))
+            elif i.startswith('print'):
+                i = i.replace('print', "")
+                #print(i)
+                for j in printList:
+                    if j == i:
+                        printList.remove(j)
+                        break
+                print(printList)
+
+            elif i.startswith('move'):
+                i = i.replace('move', '')
+                moves.reverse()
+                moves.remove(i)
+                moves.reverse()
+
+                print(moves)
+
+    elif conditionVerifier(condition):
+        print('--Entered if is true--')
+        for i in block2:
+            if i.startswith('SET'):
+                i = i.replace('SET', '')
+                for key, value in variables.items():
+                    if key == i:
+                        variables.pop(i)
+                        break
+
+                print(variables)
+
+            elif i.startswith('bool'):
+                i = i.replace('bool', '')
+                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', i)
+                #print('Variable: ' + str(variable))
+                variableTemp = variable[0]
+                i = i[len(variableTemp):len(i)]
+                i = i.split('&')
+                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                for key, value in variables.items():
+                    if key == variableTemp:
+                        if i[0] == '.Neg' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.Neg' and value[0] == 'False':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'True' and value[0] == 'True':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'False' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'False' and value[0] == 'False':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
+                            value[0] = 'True'
+                print('Variables after if is false: ' + str(variables))
+            elif i.startswith('print'):
+                i = i.replace('print', "")
+                print(i)
+                for j in printList:
+                    if j == i:
+                        printList.remove(j)
+                        break
+                print(printList)
+
+            elif i.startswith('move'):
+                i = i.replace('move', '')
+                moves.reverse()
+                moves.remove(i)
+                moves.reverse()
+
+                print(moves)
+                        
+    return str(conditionVerifier(condition))
+
+def ifVerifier2(condition, block):
+    #print(str(conditionVerifier(condition)))
+    global cuandoEntonsList
+
+    block = block.replace(";", ",")
+    block = block.split(",")
+
+    #print('Condition: ' + str(condition) + ' block: ' + str(block))
+
+    for i in block:
+        if i == 'None':
+            block.remove(i)
+    try:
+        block.remove('None')
+    except:
+        pass
+
+    #print(block)
 
 
+    if not(conditionVerifier(condition)):
+        print('--Entered if is false--')
+        for i in block:
+            if i.startswith('SET'):
+                i = i.replace('SET', '')
+                for key, value in variables.items():
+                    if key == i:
+                        variables.pop(i)
+                        break
 
+                print(variables)
 
+            elif i.startswith('bool'):
+                i = i.replace('bool', '')
+                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', i)
+                #print('Variable: ' + str(variable))
+                variableTemp = variable[0]
+                i = i[len(variableTemp):len(i)]
+                i = i.split('&')
+                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                for key, value in variables.items():
+                    if key == variableTemp:
+                        if i[0] == '.Neg' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.Neg' and value[0] == 'False':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'True' and value[0] == 'True':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'False' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'False' and value[0] == 'False':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
+                            value[0] = 'True'
+                print('Variables after if is false: ' + str(variables))
+            elif i.startswith('print'):
+                i = i.replace('print', "")
+                #print(i)
+                for j in printList:
+                    if j == i:
+                        printList.remove(j)
+                        break
+                print(printList)
+
+            elif i.startswith('move'):
+                i = i.replace('move', '')
+                moves.reverse()
+                moves.remove(i)
+                moves.reverse()
+
+                print(moves)
+
+    elif conditionVerifier(condition):
+        for i in block:
+            cuandoEntonsList.append(i)
+
+        cuandoEntonsList.append('END')
+        
+                        
+    return str(conditionVerifier(condition))
+
+def forVerifier(id, factor, num, block):
+    idTemp = id
+    factorTemp = factor
+
+    #print(str(id) + ',' + str(factor) + ',' + str(num))
+
+    for key, value in variables.items():
+        if key == idTemp and value[1] == 'num':
+            idTemp = value[0]
+        elif key == idTemp and value[1] == 'bool':
+            print("Error semantico, no se pueden usar booleanos en ciclos For 1")
+            return 'Error'
+        elif key != idTemp:
+            pass
+        
+    for key, value in variables.items():
+        if key == factorTemp and value[1] == 'num':
+            factorTemp = value[0]
+        elif key == factorTemp and value[1] == 'bool':
+            print("Error semantico, no se pueden usar booleanos en ciclos For 2")
+            return 'Error'
+        elif key != factorTemp:
+            pass
     
+    #print(factorTemp)
 
-def p_procDeclSt2(p):
-    '''procDeclSt : DEF ID LPARENTHESES parameter RPARENTHESES LBRACKET blockList RBRACKET'''
-    print('procDeclSt 2')
+    if idTemp.find('@') != -1:
+        idTemp = 1
+    if factorTemp.find('@') != -1:
+        print("Error semantico, no se pueden usar booleanos en ciclos For o variable maxima no definida")
+        return 'Error'
 
-def p_procDeclSt3(p):
-    '''procDeclSt : DEF PRINCIPAL LBRACKET blockList RBRACKET'''
-    print("procDeclSt 3")
+    block = block.replace(";", ",")
+    block = block.split(",")
+    blockTemp = block
 
-def p_procDeclSt4(p):
-    '''procDeclSt : EXEC ID LPARENTHESES parameter RPARENTHESES'''
-    print("procDeclSt 4")
+    for i in block:
+        if i == 'None':
+            block.remove(i)
+    try:
+        block.remove('None')
+    except:
+        pass
 
-def p_parameter1(p):
-    '''parameter : parameterList'''
-    print('parameter 1')
+    for i in block:
+        if i.startswith('SET'):
+            i = i.replace('SET', '')
+            for key, value in variables.items():
+                if key == i:
+                    variables.pop(i)
+                    break
+            
+            if int(idTemp) <= int(factorTemp) + 1:
+                for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                    idTemp = x
+                varDeclaration(i, idTemp)
+            else:
+                return ''
 
-def p_parameter2(p):
-    '''parameter : empty'''
-    print('parameter 2')
+            print(variables)
 
-def p_parameterList1(p):
-    '''parameterList : factor'''
-    print('parameterList 1')
+        elif i.startswith('bool'):
+            i = i.replace('bool', '')
+            variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', i)
+            #print('Variable: ' + str(variable))
+            variableTemp = variable[0]
+            i = i[len(variableTemp):len(i)]
+            i = i.split('&')
+            #print('variable: ' + str(variable) + ' i: ' + str(i))
+            for key, value in variables.items():
+                if key == variableTemp:
+                    if i[0] == '.Neg' and value[0] == 'True':
+                        value[0] = 'False'
+                    elif i[0] == '.Neg' and value[0] == 'False':
+                        value[0] = 'True'
+                    elif i[0] == '.T' and i[1] == 'True' and value[0] == 'True':
+                        value[0] = 'True'
+                    elif i[0] == '.T' and i[1] == 'False' and value[0] == 'True':
+                        value[0] = 'False'
+                    elif i[0] == '.F' and i[1] == 'False' and value[0] == 'False':
+                        value[0] = 'False'
+                    elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
+                        value[0] = 'True'
+            #print('Variables after deleting past: ' + str(variables))
+            
+            if int(idTemp) <= int(factorTemp) + 1:
+                varTemp = idTemp - 1
+                for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                    varTemp += 1
+                    #print('varTemp: ' + str(varTemp))    
+                if varTemp % 2 != 0:
+                    for key, value in variables.items():
+                        if key == variableTemp:
+                            if i[0] == '.Neg' and value[0] == 'True':
+                                value[0] = 'False'
+                            elif i[0] == '.Neg' and value[0] == 'False':
+                                value[0] = 'True'
+                else:
+                    pass
+            else:
+                return ''
 
-def p_parameterList2(p):
-    '''parameterList : parameterList COMMA factor'''
-    print('parameterList 2')   
+            print('Variables after for: ' + str(variables))
 
-def p_statementDecl1(p):
-    '''statementDecl : statementList SEMICOLON'''
-    print ("statementDecl 1")
+        elif i.startswith('print'):
+            i = i.replace('print', "")
+            for j in printList:
+                if j == i:
+                    printList.remove(j)
+                    break
+            #iTemp = re.split(r'd+', i)
+            if int(idTemp) <= int(factorTemp) + 1:
+                for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                        if j == value[0]:
+                            iTemp2 = i.replace(j, x)
+                            printList.append(iTemp2)
 
-def p_statementDeclEmpty(p):
-	'''statementDecl : empty'''
-	print ("nulo")
+            print(printList)
 
-def p_statement1(p):
-	'''statement : IF condition LBRACKET blockList RBRACKET'''
-	print ("statement 1")
+        elif i.startswith('move'):
+            i = i.replace('move', '')
+            moves.reverse()
+            moves.remove(i)
+            moves.reverse()
 
-def p_statement2(p):
-	'''statement : IF condition LBRACKET blockList RBRACKET ELSE LBRACKET blockList RBRACKET'''
-	print ("statement 2")
+            if int(idTemp) <= int(factorTemp) + 1:
+                for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                    moves.append(i)
+            else:
+                return ''
 
-def p_statement3(p):
-	'''statement : FOR ID TO factor STEP NUMBER LBRACKET blockList RBRACKET'''
-	print ("statement 3")
+            print(moves)
 
-def p_statement4(p):
-    '''statement : FOR ID TO factor LBRACKET blockList RBRACKET'''
-    print ("statement 4")
+    #print(str(idTemp) + str(factorTemp))
+    
+    if int(idTemp) <= int(factorTemp) + 1:
+        for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+            print(x)
+    else:
+        return ''
+    
+def enCasoVerifier(boolString, block):
+    boolString = boolString.split(";")
 
-def p_statement4(p):
-    '''statement : ENCASO cuandoEntonsList SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
-    print ("statement 4")
+    block = block.replace(";", ",")
+    block = block.split(",")
 
-def p_statement5(p):
-    '''statement : ENCASO ID cuandoEntonsListAux SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
-    print ("statement 5")
+    #print('Block: ' + str(block))
 
-def p_statementList1(p):
-	'''statementList : statement'''
-	print ("statementList 1")
+    for i in block:
+        if i == 'None':
+            block.remove(i)
+    try:
+        block.remove('None')
+    except:
+        pass
 
-def p_statementList2(p):
-	'''statementList : statementList SEMICOLON statement'''
-	print ("statementList 2")
+    #print('Block: ' + str(block))
 
-def p_cuandoEntonsList1(p):
-    '''cuandoEntonsList : cuandoEntons'''
-    print ("cuandoEntonsList 1")
+    if boolString.count("True") > 0:
+        print('--Entered if is false--')
+        for i in block:
+            if i.startswith('SET'):
+                i = i.replace('SET', '')
+                for key, value in variables.items():
+                    if key == i:
+                        variables.pop(i)
+                        break
 
-def p_cuandoEntonsList2(p):
-    '''cuandoEntonsList : cuandoEntonsList SEMICOLON cuandoEntons'''
-    print ("cuandoEntonsList 2")
+                #print(variables)
 
-def p_cuandoEntons1(p):
-    '''cuandoEntons : CUANDO ID relation factor ENTONS LBRACKET blockList RBRACKET'''
-    print ("cuandoEntons 1")
+            elif i.startswith('bool'):
+                i = i.replace('bool', '')
+                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', i)
+                #print('Variable: ' + str(variable))
+                variableTemp = variable[0]
+                i = i[len(variableTemp):len(i)]
+                i = i.split('&')
+                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                for key, value in variables.items():
+                    if key == variableTemp:
+                        if i[0] == '.Neg' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.Neg' and value[0] == 'False':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'True' and value[0] == 'True':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'False' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'False' and value[0] == 'False':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
+                            value[0] = 'True'
+                #print('Variables after if is false: ' + str(variables))
+            elif i.startswith('print'):
+                i = i.replace('print', "")
+                #print(i)
+                for j in printList:
+                    if j == i:
+                        printList.remove(j)
+                        break
+                #print(printList)
 
-def p_cuandoEntonsAux1(p):
-    '''cuandoEntonsAux : CUANDO relation factor ENTONS LBRACKET blockList RBRACKET'''
-    print ("cuandoEntons 1")
+            elif i.startswith('move'):
+                i = i.replace('move', '')
+                moves.reverse()
+                moves.remove(i)
+                moves.reverse()
 
-def p_cuandoEntonsListAux1(p):
-    '''cuandoEntonsListAux : cuandoEntonsAux'''
-    print ("cuandoEntonsList 1")
+                print(moves)
+                        
+    return 'En caso'
 
-def p_cuandoEntonsListAux2(p):
-    '''cuandoEntonsListAux : cuandoEntonsListAux SEMICOLON cuandoEntonsAux'''
-    print ("cuandoEntonsList 2")    
+def enCasoVerifier2(boolString, block):
+    global cuandoEntonsList
+    boolString = boolString.split(";")
 
-def p_condition1(p):
-	'''condition : arithOperation relation arithOperation'''
-	print ("condition 1")
+    block = block.replace(";", ",")
+    block = block.split(",")
 
-def p_condition2(p):
-	'''condition : arithOperation relation factor'''
-	print ("condition 2")
+    for i in block:
+        if i == 'None':
+            block.remove(i)
+    try:
+        block.remove('None')
+    except:
+        pass
 
-def p_condition3(p):
-	'''condition : factor relation arithOperation'''
-	print ("condition 3")
+    #print('CuandoEntonsList: ' + str(cuandoEntonsList) + ' boolString: ' + str(boolString) + ' block: ' + str(block))
 
-def p_condition4(p):
-	'''condition : factor relation factor'''
-	print ("condition 4")
+    if boolString.count("True") >= 1:
+        print('--Entered entons is true--')
+        for i in block:
+            if i.startswith('SET'):
+                i = i.replace('SET', '')
+                for key, value in variables.items():
+                    if key == i:
+                        variables.pop(i)
+                        break
 
-def p_condition5(p):
-    '''condition : factor'''
-    print ("condition 5")
+                #print(variables)
+
+            elif i.startswith('bool'):
+                i = i.replace('bool', '')
+                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', i)
+                #print('Variable: ' + str(variable))
+                variableTemp = variable[0]
+                i = i[len(variableTemp):len(i)]
+                i = i.split('&')
+                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                for key, value in variables.items():
+                    if key == variableTemp:
+                        if i[0] == '.Neg' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.Neg' and value[0] == 'False':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'True' and value[0] == 'True':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'False' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'False' and value[0] == 'False':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
+                            value[0] = 'True'
+                #print('Variables after if is false: ' + str(variables))
+            elif i.startswith('print'):
+                i = i.replace('print', "")
+                #print(i)
+                for j in printList:
+                    if j == i:
+                        printList.remove(j)
+                        break
+                #print(printList)
+
+            elif i.startswith('move'):
+                i = i.replace('move', '')
+                moves.reverse()
+                moves.remove(i)
+                moves.reverse()
+
+                print(moves)
+
+    if boolString.count("True") >= 2:
+        print("--Entered entons is true 2--")
+        check = True
+        cuandoEntonsList.reverse()
+        #print('CuandoEntonsList2: ' + str(cuandoEntonsList))
+        for i in cuandoEntonsList:
+            if i.startswith('SET'):
+                i = i.replace('SET', '')
+                for key, value in variables.items():
+                    if key == i:
+                        variables.pop(i)
+                        break
+
+                #print(variables)
+
+            elif i.startswith('bool'):
+                i = i.replace('bool', '')
+                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', i)
+                #print('Variable: ' + str(variable))
+                variableTemp = variable[0]
+                i = i[len(variableTemp):len(i)]
+                i = i.split('&')
+                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                for key, value in variables.items():
+                    if key == variableTemp:
+                        if i[0] == '.Neg' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.Neg' and value[0] == 'False':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'True' and value[0] == 'True':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'False' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'False' and value[0] == 'False':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
+                            value[0] = 'True'
+                #print('Variables after if is false: ' + str(variables))
+            elif i.startswith('print'):
+                i = i.replace('print', "")
+                #print(i)
+                for j in printList:
+                    if j == i:
+                        printList.remove(j)
+                        break
+                #print(printList)
+
+            elif i.startswith('move'):
+                i = i.replace('move', '')
+                moves.reverse()
+                moves.remove(i)
+                moves.reverse()
+
+                print(moves)
+
+            if i.startswith("END"):
+                if check:
+                    check = False
+                    pass
+                elif not(check):
+                    break
+                        
+    cuandoEntonsList.clear()
+    return 'En caso2'

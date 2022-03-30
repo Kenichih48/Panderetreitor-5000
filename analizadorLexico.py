@@ -36,7 +36,7 @@ t_GT = r'>'
 t_GTE = r'>='
 t_LT = r'<'
 t_LTE = r'<='
-t_STRING = r'"[\w\s\d]*"'
+t_STRING = r'"[\:\@\!\?\_\w\s\d]*"'
 t_ENCASO = r'EnCaso'
 t_SINO = r'SiNo'
 t_FINENCASO = r'Fin-EnCaso'
@@ -177,7 +177,8 @@ directorio = "/home/kash/Documents/GitHub/Tambarduine/Pruebas/"
 #fp.close()
 
 lexer = lex()
-#lexer.input(cadena)
+#analizador = lex()
+#analizador.input(cadena)
 #contador = 0
 
 #while True:
