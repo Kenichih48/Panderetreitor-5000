@@ -1,55 +1,156 @@
 import re
+from analizadorSintactico import *
 variables = {}
+variablesTemp = []
+varsTemp = {}
 moves = []
 metronomoOn = True
 printParameters = ''
 printList = []
 cuandoEntonsList = []
-defRutinas = []
+defRutinasDict = {}
+contador = 0
 
 def returnVariables():
+    #print(bool(variables))
+    for key, value in variables.items():
+        for idx, i in enumerate(variablesTemp):
+            if key == i[0]:
+                variablesTemp.pop(idx)
+                break
+    if variablesTemp:
+        for idx, i in enumerate(variablesTemp):
+            print("Error semantico, la variable %s nunca fue definida" % variablesTemp[idx][0])
+
+    #if variablesTemp:
+    #    for i in range(len(variablesTemp)):
+    #        print("Error semantico, la variable %s nunca fue definida" % variablesTemp[i][0])
     return variables
 
 def returnMoves():
     return moves
 
 def returnPrintList():
-    return printList
-        
-class varDeclaration:
-    def __init__(self, id, value_):
-        check = True
-        self.name = id
-        self.value = value_
-        if (value_ == 'True') or (value_ == 'False'):
-            self.type = 'bool'
-        else:
-            try:
-                float(value_)
-            except:
-                self.type = ''
-                print('Error semantico, la variable por definir no es aceptable')
-                check = False
-            else:
-                self.type = 'num'
+    printListTemp = []
 
-        if  not(bool(variables)) and check == True:
-            variables[self.name] = [self.value, self.type]
-        elif check == True:
+    for i in printList:
+        iTemp = re.findall(r'\-\-\@[a-zA-Z0-9\?\_]{2,9}', i)
+        for j in iTemp:
+            #print("j: " + str(j))
+            #if j.startswith("--"):
+                #j = j.replace("--", "")
+                #i = i.replace("--", "")
             for key, value in variables.items():
-                if key == id and value[1] == self.type:
-                    variables[self.name] = [self.value, self.type]
-                    break
-                elif key == id and value[1] != self.type:
-                    print("Error semantico, la variable ya existe y se le quiere cambiar el tipo")
-                    break 
-            else:
-                variables[self.name] = [self.value, self.type]
+                if "--" + key == j:
+                    #print("key: " + "--" + str(key))
+                    i = i.replace("--" + str(key), str(value[0]))
+                elif key != j:
+                    pass
+                #elif key == j:
+                #    i = i.replace(str(key), str(value[0]))
 
-        print(variables)
+        printListTemp.append(i)
 
-    def returnVariable(self):
-        return 'SET' + self.name
+    #if not(isNum(variable)) and variable.find('@') != -1:
+    #    print("Error semantico, la variable por imprimir no ha sido definida")
+    #else:
+
+    return printListTemp
+        
+#class varDeclaration:
+#    def __init__(self, id, value_):
+#        check = True
+#        self.name = id
+#        self.value = value_
+        
+#        if (value_ == 'True') or (value_ == 'False'):
+#            self.type = 'bool'
+#        else:
+#            try:
+#                #print(self.name + ": " + str(float(self.value)))
+#                float(self.value)
+#            except ValueError:
+#                self.type = ''
+#                print('Error semantico, la variable por definir no es aceptable: ' + self.name)
+#                check = False
+#            else:
+#                #print('Entered here')
+#                self.type = 'num'
+
+#        if  not(bool(variables)) and check == True:
+#            variables[self.name] = [self.value, self.type]
+#        elif check == True:
+#            for key, value in variables.items():
+#                if key == id and value[1] == self.type:
+#                    variables[self.name] = [self.value, self.type]
+#                    break
+#                elif key == id and value[1] != self.type:
+#                    print("Error semantico, la variable ya existe y se le quiere cambiar el tipo")
+#                    break 
+#            else:
+#                variables[self.name] = [self.value, self.type]
+
+        #print(variables)
+
+#    def returnVariable(self):
+#        return 'SET' + self.name
+
+def varDeclarationTemp(id, val):
+    global varsTemp
+    check = True
+
+    if  not(bool(varsTemp)):
+        varsTemp[id] = val
+    elif check == True:
+        for key, value in varsTemp.items():
+            if key == id:
+                varsTemp[id] = val
+                break
+        else:
+            varsTemp[id] = val
+
+    #print(varsTemp)
+
+    #return 'SET' + id
+
+def varDeclaration(id, val):
+    global variables
+    typeV = ''
+    check = True
+    valTemp = str(val)
+    if (val == 'True') or (val == 'False'):
+        typeV = 'bool'
+    elif (valTemp.count("@") == 1):
+        variablesTemp.append([id, valTemp])
+        print("Variables temp: " + str(variablesTemp))
+        return 'SET' + id
+    else:
+        try:
+            float(valTemp)
+        except ValueError as e:
+            typeV = ''
+            check = False
+        else:
+            typeV = 'num'
+
+    if  not(bool(variables)) and check == True:
+        variables[id] = [val, typeV]
+    elif check == True:
+        for key, value in variables.items():
+            if key == id and value[1] == typeV:
+                varDeclarationTemp(id, [value[0], value[1]])
+                variables[id] = [val, typeV]
+                break
+            elif key == id and value[1] != typeV:
+                print("Error semantico, la variable ya existe y se le quiere cambiar el tipo")
+                break 
+        else:
+            variables[id] = [val, typeV]
+
+    #print(variables)
+
+    return 'SET' + id
+
 
 def arithOperation(operation):
     newOper = operation
@@ -74,6 +175,7 @@ def arithOperation(operation):
         return eval(newOper)
 
 def boolOperation(id, operation):
+    tempValue = ''
     for key, value in variables.items():
         tempValue = value[0]
         if key == id and value[1] == 'bool' and operation == '.Neg':
@@ -87,9 +189,13 @@ def boolOperation(id, operation):
             value[0] = 'False'
         elif key == id and value[1] == 'num':
             print("Error semantico, no se pueden hacer operaciones booleanas con numeros")
-    print(variables)
+    #print(variables)
 
-    return 'bool' + id + operation + '&' + tempValue
+    if tempValue == '':
+        print("Error semantico, no se pueden hacer operaciones booleanas con variables no existentes")
+        return "Error"
+    else:
+        return 'bool' + id + operation + '&' + tempValue
 
 def Metronomo(movimiento):
 
@@ -119,7 +225,7 @@ def Metronomo(movimiento):
         return 'move' + 'P'
         
 
-    print(moves)
+    #print(moves)
 
 def Abanico(movimiento):
     movimiento = movimiento[len(movimiento)-2]
@@ -166,7 +272,7 @@ def Golpe(movimiento):
     else:
         print('Metronomo is not activated')
 
-    print(moves)
+    #print(moves)
 
     return 'move' + movimiento
 
@@ -196,7 +302,7 @@ def toPrint():
     global printParameters, printList
     
     printList.append(printParameters)
-    print(printParameters)
+    #print(printParameters)
 
     printParametersTemp = printParameters
     printParameters = ''
@@ -216,14 +322,22 @@ def addPrintPar(string):
 def addPrintPar2(variable):
     global printParameters
 
-    for key, value in variables.items():
-        if key == variable:
-            variable = variable.replace(str(key), str(value[0]))
-        elif key != variable:
-            pass
+    #for key, value in variables.items():
+    #    if key == variable:
+    #        variable = variable.replace(str(key), str(value[0]))
+    #    elif key != variable:
+    #        pass
 
-    if not(isNum(variable)) and variable.find('@') != -1:
-        print("Error semantico, la variable por imprimir no ha sido definida")
+    #if not(isNum(variable)) and variable.find('@') != -1:
+    #    print("Error semantico, la variable por imprimir no ha sido definida")
+    #else:
+    if not(isNum(variable)):
+        for key, value in variables.items():
+            if key == variable:
+                printParameters += value[0]
+                break
+        else:
+            printParameters += '--' + str(variable)
     else:
         printParameters += str(variable)
 
@@ -234,7 +348,7 @@ def conditionVerifier(condition):
 
     for key, value in variables.items():
         for var in variable:
-            if key == var:
+            if key == var and (value[1] == "num" or value[1] == "bool"):
                 #print("Condition: " + str(condition) + ", Key: " + str(key) + ", Value: " + str(value[0]))
                 condition = condition.replace(str(key), str(value[0]))
             elif key != var:
@@ -244,12 +358,12 @@ def conditionVerifier(condition):
 
     for element in condition:
         if element == '@':
-            print("Error semantico, la variable por imprimir no ha sido definida")
+            print("Error semantico, la variable usada no ha sido definida")
     else:
         return eval(condition)    
 
 def ifVerifier(condition, block, block2):
-    #print(str(conditionVerifier(condition)))
+
     checkBlock2 = True
     block = block.replace(";", ",")
     block = block.split(",")
@@ -259,6 +373,7 @@ def ifVerifier(condition, block, block2):
     except:
         checkBlock2 = False
 
+    
     for i in block:
         if i == 'None':
             block.remove(i)
@@ -280,7 +395,7 @@ def ifVerifier(condition, block, block2):
     #print('Block: ' + str(block))
 
     if not(conditionVerifier(condition)):
-        print('--Entered if is false--')
+        #print('--Entered if is false--')
         for i in block:
             if i.startswith('SET'):
                 i = i.replace('SET', '')
@@ -289,7 +404,7 @@ def ifVerifier(condition, block, block2):
                         variables.pop(i)
                         break
 
-                print(variables)
+                #print(variables)
 
             elif i.startswith('bool'):
                 i = i.replace('bool', '')
@@ -313,7 +428,7 @@ def ifVerifier(condition, block, block2):
                             value[0] = 'False'
                         elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
                             value[0] = 'True'
-                print('Variables after if is false: ' + str(variables))
+                #print('Variables after if is false: ' + str(variables))
             elif i.startswith('print'):
                 i = i.replace('print', "")
                 #print(i)
@@ -321,7 +436,7 @@ def ifVerifier(condition, block, block2):
                     if j == i:
                         printList.remove(j)
                         break
-                print(printList)
+                #print(printList)
 
             elif i.startswith('move'):
                 i = i.replace('move', '')
@@ -329,10 +444,93 @@ def ifVerifier(condition, block, block2):
                 moves.remove(i)
                 moves.reverse()
 
-                print(moves)
+                #print(moves)
+
+            elif i.startswith('exec'):
+                i = i.replace('exec', '')
+                parametersTemp = i.split('&')
+                id = parametersTemp[0]
+                parametersTemp.pop(0)
+                for x in parametersTemp:
+                    if x == '':
+                        parametersTemp.remove(x)
+                #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+                for key, value in defRutinasDict.items():
+                    #print('key: ' + str(key) + ', value' + str(value[1]))
+                    if id == key:
+                        for j in value[1]:
+                            for idx, k in enumerate(value[0]):
+                                #print(k)
+                                #print(j.find(k) != -1)
+                                if j.find(k) != -1:
+                                    #print(k, parametersTemp[idx])
+                                    j = j.replace(k, parametersTemp[idx])
+                            #print('j: ' + str(j))
+                            if j.startswith('SET'):
+                                jTemp = j.replace('SET', '')
+                                jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                for key2, value2 in variables.items():
+                                    if key2 == jTemp[0]:
+                                        variables.pop(jTemp[0])
+                                        break
+
+                                #print(variables)
+
+                            elif j.startswith('bool'):
+                                jTemp = j.replace('bool', '')
+                                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                #print('Variable: ' + str(variable))
+                                variableTemp = variable[0]
+                                jTemp = jTemp[len(variableTemp):len(i)]
+                                jTemp = jTemp.split('&')
+                                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                                for key2, value2 in variables.items():
+                                    if key2 == variableTemp:
+                                        if jTemp[0] == '.Neg' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.Neg' and value[0] == 'False':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                            value[0] = 'True'
+                                #print('Variables after if is false: ' + str(variables))
+                            elif j.startswith('print'):
+                                jTemp = j.replace('print', "")
+                                
+                                try:
+                                    jTemp = jTemp.replace("--", "")
+                                except:
+                                    pass
+                                #print(jTemp)
+                                for k in printList:
+                                    if k == jTemp:
+                                        printList.remove(jTemp)
+                                        break
+                                #print(printList)
+
+                            elif j.startswith('move'):
+                                jTemp = j.replace('move', '')
+                                #print(j)
+                                moves.reverse()
+                                moves.remove(jTemp)
+                                moves.reverse()
+
+
+        blockTemp = ''
+        for x in block2:
+            blockTemp += x + ';'
+
+        #print(str(conditionVerifier(condition)) + ';' + blockTemp)
+
+        return str(conditionVerifier(condition)) + ';' + blockTemp
 
     elif conditionVerifier(condition):
-        print('--Entered if is true--')
+        #print('--Entered if is true--')
         for i in block2:
             if i.startswith('SET'):
                 i = i.replace('SET', '')
@@ -341,7 +539,7 @@ def ifVerifier(condition, block, block2):
                         variables.pop(i)
                         break
 
-                print(variables)
+                #print(variables)
 
             elif i.startswith('bool'):
                 i = i.replace('bool', '')
@@ -365,15 +563,15 @@ def ifVerifier(condition, block, block2):
                             value[0] = 'False'
                         elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
                             value[0] = 'True'
-                print('Variables after if is false: ' + str(variables))
+                #print('Variables after if is false: ' + str(variables))
             elif i.startswith('print'):
                 i = i.replace('print', "")
-                print(i)
+                #print(i)
                 for j in printList:
                     if j == i:
                         printList.remove(j)
                         break
-                print(printList)
+                #print(printList)
 
             elif i.startswith('move'):
                 i = i.replace('move', '')
@@ -381,9 +579,91 @@ def ifVerifier(condition, block, block2):
                 moves.remove(i)
                 moves.reverse()
 
-                print(moves)
+                #print(moves)
+
+            elif i.startswith('exec'):
+                i = i.replace('exec', '')
+                parametersTemp = i.split('&')
+                id = parametersTemp[0]
+                parametersTemp.pop(0)
+                for x in parametersTemp:
+                    if x == '':
+                        parametersTemp.remove(x)
+                #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+                for key, value in defRutinasDict.items():
+                    #print('key: ' + str(key) + ', value' + str(value[1]))
+                    if id == key:
+                        for j in value[1]:
+                            for idx, k in enumerate(value[0]):
+                                #print(k)
+                                #print(j.find(k) != -1)
+                                if j.find(k) != -1:
+                                    #print(k, parametersTemp[idx])
+                                    j = j.replace(k, parametersTemp[idx])
+                            #print('j: ' + str(j))
+                            if j.startswith('SET'):
+                                jTemp = j.replace('SET', '')
+                                jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                for key2, value2 in variables.items():
+                                    if key2 == jTemp[0]:
+                                        variables.pop(jTemp[0])
+                                        break
+
+                                #print(variables)
+
+                            elif j.startswith('bool'):
+                                jTemp = j.replace('bool', '')
+                                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                #print('Variable: ' + str(variable))
+                                variableTemp = variable[0]
+                                jTemp = jTemp[len(variableTemp):len(i)]
+                                jTemp = jTemp.split('&')
+                                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                                for key2, value2 in variables.items():
+                                    if key2 == variableTemp:
+                                        if jTemp[0] == '.Neg' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.Neg' and value[0] == 'False':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                            value[0] = 'True'
+                                #print('Variables after if is false: ' + str(variables))
+                            elif j.startswith('print'):
+                                jTemp = j.replace('print', "")
+                                
+                                try:
+                                    jTemp = jTemp.replace("--", "")
+                                except:
+                                    pass
+                                #print(jTemp)
+                                for k in printList:
+                                    if k == jTemp:
+                                        printList.remove(jTemp)
+                                        break
+                                #print(printList)
+
+                            elif j.startswith('move'):
+                                jTemp = j.replace('move', '')
+                                #print(j)
+                                moves.reverse()
+                                moves.remove(jTemp)
+                                moves.reverse()
+
+        blockTemp = ''
+        for x in block:
+            blockTemp += x + ';'
+
+        #print(str(conditionVerifier(condition)) + ';' + blockTemp)
+
+        return str(conditionVerifier(condition)) + ';' + blockTemp        
                         
-    return str(conditionVerifier(condition))
+    #return str(conditionVerifier(condition))
 
 def ifVerifier2(condition, block):
     #print(str(conditionVerifier(condition)))
@@ -406,7 +686,7 @@ def ifVerifier2(condition, block):
 
 
     if not(conditionVerifier(condition)):
-        print('--Entered if is false--')
+        #print('--Entered if is false--')
         for i in block:
             if i.startswith('SET'):
                 i = i.replace('SET', '')
@@ -415,7 +695,7 @@ def ifVerifier2(condition, block):
                         variables.pop(i)
                         break
 
-                print(variables)
+                #print(variables)
 
             elif i.startswith('bool'):
                 i = i.replace('bool', '')
@@ -439,7 +719,7 @@ def ifVerifier2(condition, block):
                             value[0] = 'False'
                         elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
                             value[0] = 'True'
-                print('Variables after if is false: ' + str(variables))
+                #print('Variables after if is false: ' + str(variables))
             elif i.startswith('print'):
                 i = i.replace('print', "")
                 #print(i)
@@ -447,7 +727,7 @@ def ifVerifier2(condition, block):
                     if j == i:
                         printList.remove(j)
                         break
-                print(printList)
+                #print(printList)
 
             elif i.startswith('move'):
                 i = i.replace('move', '')
@@ -455,20 +735,100 @@ def ifVerifier2(condition, block):
                 moves.remove(i)
                 moves.reverse()
 
-                print(moves)
+                #print(moves)
+
+            elif i.startswith('exec'):
+                i = i.replace('exec', '')
+                parametersTemp = i.split('&')
+                id = parametersTemp[0]
+                parametersTemp.pop(0)
+                for x in parametersTemp:
+                    if x == '':
+                        parametersTemp.remove(x)
+                #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+                for key, value in defRutinasDict.items():
+                    #print('key: ' + str(key) + ', value' + str(value[1]))
+                    if id == key:
+                        for j in value[1]:
+                            for idx, k in enumerate(value[0]):
+                                #print(k)
+                                #print(j.find(k) != -1)
+                                if j.find(k) != -1:
+                                    #print(k, parametersTemp[idx])
+                                    j = j.replace(k, parametersTemp[idx])
+                            #print('j: ' + str(j))
+                            if j.startswith('SET'):
+                                jTemp = j.replace('SET', '')
+                                jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                for key2, value2 in variables.items():
+                                    if key2 == jTemp[0]:
+                                        variables.pop(jTemp[0])
+                                        break
+
+                                #print(variables)
+
+                            elif j.startswith('bool'):
+                                jTemp = j.replace('bool', '')
+                                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                #print('Variable: ' + str(variable))
+                                variableTemp = variable[0]
+                                jTemp = jTemp[len(variableTemp):len(i)]
+                                jTemp = jTemp.split('&')
+                                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                                for key2, value2 in variables.items():
+                                    if key2 == variableTemp:
+                                        if jTemp[0] == '.Neg' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.Neg' and value[0] == 'False':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                            value[0] = 'True'
+                                #print('Variables after if is false: ' + str(variables))
+                            elif j.startswith('print'):
+                                jTemp = j.replace('print', "")
+                                
+                                try:
+                                    jTemp = jTemp.replace("--", "")
+                                except:
+                                    pass
+                                #print(jTemp)
+                                for k in printList:
+                                    if k == jTemp:
+                                        printList.remove(jTemp)
+                                        break
+                                #print(printList)
+
+                            elif j.startswith('move'):
+                                jTemp = j.replace('move', '')
+                                #print(j)
+                                moves.reverse()
+                                moves.remove(jTemp)
+                                moves.reverse()
+
+        return str(conditionVerifier(condition))
 
     elif conditionVerifier(condition):
         for i in block:
             cuandoEntonsList.append(i)
 
         cuandoEntonsList.append('END')
+
+        blockTemp = ''
+        for x in block:
+            blockTemp += x + ';'
         
-                        
-    return str(conditionVerifier(condition))
+        return str(conditionVerifier(condition)) + ';' + blockTemp
 
 def forVerifier(id, factor, num, block):
     idTemp = id
     factorTemp = factor
+    blockTemp = []
 
     #print(str(id) + ',' + str(factor) + ',' + str(num))
 
@@ -489,8 +849,6 @@ def forVerifier(id, factor, num, block):
             return 'Error'
         elif key != factorTemp:
             pass
-    
-    #print(factorTemp)
 
     if idTemp.find('@') != -1:
         idTemp = 1
@@ -500,7 +858,6 @@ def forVerifier(id, factor, num, block):
 
     block = block.replace(";", ",")
     block = block.split(",")
-    blockTemp = block
 
     for i in block:
         if i == 'None':
@@ -513,22 +870,40 @@ def forVerifier(id, factor, num, block):
     for i in block:
         if i.startswith('SET'):
             i = i.replace('SET', '')
+            keyTemp = ''
+            valueTemp = ''
             for key, value in variables.items():
                 if key == i:
+                    keyTemp = key
+                    valueTemp = value[0]
                     variables.pop(i)
                     break
-            
-            if int(idTemp) <= int(factorTemp) + 1:
-                for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
-                    idTemp = x
-                varDeclaration(i, idTemp)
-            else:
-                return ''
 
-            print(variables)
+            for idx, j in enumerate(variablesTemp):
+                #print("id: " + id)
+                if j[1] == id:
+                    if int(idTemp) <= int(factorTemp) + 1:
+                        for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                            idTemp = x
+                        varDeclaration(i, idTemp)
+                        blockTemp.append('SET' + i)
+                    else:
+                        return ''
+                    variablesTemp.pop(idx)
+                    break
+                else:
+                    pass
+            else:
+                varDeclaration(keyTemp, valueTemp)
+            
+            
+
+            #print(variables)
 
         elif i.startswith('bool'):
+            blockTemp.append(i + '&' + str(idTemp) + '&' + str(factorTemp) + '&' + str(num))
             i = i.replace('bool', '')
+            #print(i)
             variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', i)
             #print('Variable: ' + str(variable))
             variableTemp = variable[0]
@@ -568,22 +943,26 @@ def forVerifier(id, factor, num, block):
             else:
                 return ''
 
-            print('Variables after for: ' + str(variables))
+            #print('Variables after for: ' + str(variables))
 
         elif i.startswith('print'):
-            i = i.replace('print', "")
+            iTemp = i.replace('print', "")
+            varTemp = []
             for j in printList:
-                if j == i:
+                if j == iTemp:
+                    varTemp = re.findall(r'\-\-\@[a-zA-Z0-9\?\_]{2,9}', j)
                     printList.remove(j)
                     break
-            #iTemp = re.split(r'd+', i)
-            if int(idTemp) <= int(factorTemp) + 1:
-                for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
-                        if j == value[0]:
-                            iTemp2 = i.replace(j, x)
+            for j2 in varTemp:
+                if j2 == "--" + id:
+                    if int(idTemp) <= int(factorTemp) + 1:
+                        for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                            iTemp2 = iTemp.replace(j2, str(x))
+                            #print('iTemp2: ' + iTemp2)
                             printList.append(iTemp2)
+                            blockTemp.append('print' + iTemp2)
 
-            print(printList)
+            #print(printList)
 
         elif i.startswith('move'):
             i = i.replace('move', '')
@@ -594,21 +973,175 @@ def forVerifier(id, factor, num, block):
             if int(idTemp) <= int(factorTemp) + 1:
                 for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
                     moves.append(i)
+                    blockTemp.append('move' + i)
             else:
                 return ''
 
-            print(moves)
+        elif i.startswith('exec'):
+            i = i.replace('exec', '')
+            parametersTemp = i.split('&')
+            id2 = parametersTemp[0]
+            parametersTemp.pop(0)
+            parTemp = []
+
+            for x in parametersTemp:
+                if x == '':
+                    parametersTemp.remove(x)
+            #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+            for key, value in defRutinasDict.items():
+                #print('key: ' + str(key) + ', value' + str(value[1]))
+                if id2 == key:
+                    for j in value[1]:
+                        for idx, k in enumerate(value[0]):
+                            #print(k)
+                            #print(j.find(k) != -1)
+                            if j.find(k) != -1 and not(j.startswith("print")):
+                                #print(k, parametersTemp[idx])
+                                j = j.replace(k, parametersTemp[idx])
+                            elif j.find(k) != -1 and (j.startswith("print")):
+                                parTemp.append([k,parametersTemp[idx]])
+                                #print('j: ' + str(j))
+                        #print('j: ' + str(j))
+                        if j.startswith('SET'):
+                            keyTemp = ''
+                            valueTemp = ''
+                            jTemp = j.replace('SET', '')
+                            jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                            for key2, value2 in variables.items():
+                                if key2 == jTemp[0]:
+                                    keyTemp = key2
+                                    valueTemp = value2[0]
+                                    variables.pop(jTemp[0])
+                                    break
+                            for idx, j in enumerate(variablesTemp):
+                                    #print("id: " + id)
+                                if j[1] == id:
+                                    if int(idTemp) <= int(factorTemp) + 1:
+                                        for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                                            #idTemp = x
+                                            print("gay")
+                                        #print(i, idTemp)
+                                        varDeclaration(jTemp[0], idTemp)
+                                        blockTemp.append('SET' + jTemp[0])
+                                    else:
+                                        return ''
+                                    variablesTemp.pop(idx)
+                                    break
+                                else:
+                                    pass
+                            else:
+                                varDeclaration(keyTemp, valueTemp)
+
+                        elif j.startswith('bool'):
+                            jTemp = j.replace('bool', '')
+                            #print(jTemp)
+                            variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                            #print('Variable: ' + str(variable))
+                            variableTemp = variable[0]
+                            jTemp = jTemp[len(variableTemp):len(i)+1]
+                            jTemp = jTemp.split('&')
+                            #print(jTemp)
+                            #print('variable: ' + str(variable) + ' i: ' + str(i))
+                            for key2, value2 in variables.items():
+                                if key2 == variableTemp:
+                                    if jTemp[0] == '.Neg' and value2[0] == 'True':
+                                        value[0] = 'False'
+                                    elif jTemp[0] == '.Neg' and value2[0] == 'False':
+                                        value[0] = 'True'
+                                    elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                        value[0] = 'True'
+                                    elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                        value[0] = 'False'
+                                    elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                        value[0] = 'False'
+                                    elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                        value[0] = 'True'
+
+                            #print(variables)
+                            
+                            if int(idTemp) <= int(factorTemp) + 1:
+                                print(idTemp)
+                                varTemp = int(idTemp) - 1
+                                for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                                    varTemp += 1
+                                    #print('varTemp: ' + str(varTemp))    
+                                if varTemp % 2 != 0:
+                                    for key2, value2 in variables.items():
+                                        if key2 == variableTemp:
+                                            if jTemp[0] == '.Neg' and value2[0] == 'True':
+                                                value2[0] = 'False'
+                                            elif jTemp[0] == '.Neg' and value2[0] == 'False':
+                                                value2[0] = 'True'
+                                else:
+                                    pass
+                            else:
+                                return ''
+
+                        elif j.startswith('print'):
+                            iTemp = j.replace('print', "")
+                            try:
+                                iTemp = iTemp.replace("--", "")
+                            except:
+                                pass
+                            varTemp = []
+                            kTemp = ''
+                            yTemp = ''
+                            for k in printList:
+                                m = re.findall(r'\d+', k)
+                                for x in parTemp:
+                                    for y in m:
+                                        if x[1] == y:
+                                            kTemp = k.replace(y, x[0])
+                                            yTemp = x[0]
+                            #print('k: ' + str(kTemp) + ', iTemp: ' + str(iTemp))
+                            if kTemp == iTemp:
+                                printList.remove(k)
+
+                            if int(idTemp) <= int(factorTemp) + 1:
+                                #print('idTemp: ' + str(idTemp))
+                                for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                                    #print(x)
+                                    iTemp2 = iTemp.replace(yTemp, str(x))
+                                    #print(iTemp2)
+                                    #print('iTemp2: ' + iTemp2)
+                                    printList.append(iTemp2)
+                                    blockTemp.append('print' + iTemp2)
+
+                        elif j.startswith('move'):
+                            jTemp = j.replace('move', '')
+                            #print(j)
+                            moves.reverse()
+                            moves.remove(jTemp)
+                            moves.reverse()
+
+                            if int(idTemp) <= int(factorTemp) + 1:
+                                for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+                                    moves.append(jTemp)
+                                    blockTemp.append('move' + jTemp)
+                            else:
+                                return ''
+
+            #print(moves)
+    blockTempStr = ''
+    for x in blockTemp:
+        blockTempStr += x + ';'
+
+    #print(blockTempStr)
+    return blockTempStr
 
     #print(str(idTemp) + str(factorTemp))
     
-    if int(idTemp) <= int(factorTemp) + 1:
-        for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
-            print(x)
-    else:
-        return ''
+    #if int(idTemp) <= int(factorTemp) + 1:
+    #    for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
+    #        print(x)
+    #else:
+    #    return ''
     
 def enCasoVerifier(boolString, block):
     boolString = boolString.split(";")
+    enCasoTemp = []
+
+    print(boolString)
 
     block = block.replace(";", ",")
     block = block.split(",")
@@ -626,7 +1159,7 @@ def enCasoVerifier(boolString, block):
     #print('Block: ' + str(block))
 
     if boolString.count("True") > 0:
-        print('--Entered if is false--')
+        #print('--Entered if is false--')
         for i in block:
             if i.startswith('SET'):
                 i = i.replace('SET', '')
@@ -675,13 +1208,122 @@ def enCasoVerifier(boolString, block):
                 moves.remove(i)
                 moves.reverse()
 
-                print(moves)
+            elif i.startswith('exec'):
+                i = i.replace('exec', '')
+                parametersTemp = i.split('&')
+                id = parametersTemp[0]
+                parametersTemp.pop(0)
+                for x in parametersTemp:
+                    if x == '':
+                        parametersTemp.remove(x)
+                #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+                for key, value in defRutinasDict.items():
+                    #print('key: ' + str(key) + ', value' + str(value[1]))
+                    if id == key:
+                        for j in value[1]:
+                            for idx, k in enumerate(value[0]):
+                                #print(k)
+                                #print(j.find(k) != -1)
+                                if j.find(k) != -1:
+                                    #print(k, parametersTemp[idx])
+                                    j = j.replace(k, parametersTemp[idx])
+                            #print('j: ' + str(j))
+                            if j.startswith('SET'):
+                                jTemp = j.replace('SET', '')
+                                jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                for key2, value2 in variables.items():
+                                    if key2 == jTemp[0]:
+                                        variables.pop(jTemp[0])
+                                        break
+
+                                #print(variables)
+
+                            elif j.startswith('bool'):
+                                jTemp = j.replace('bool', '')
+                                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                #print('Variable: ' + str(variable))
+                                variableTemp = variable[0]
+                                jTemp = jTemp[len(variableTemp):len(i)]
+                                jTemp = jTemp.split('&')
+                                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                                for key2, value2 in variables.items():
+                                    if key2 == variableTemp:
+                                        if jTemp[0] == '.Neg' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.Neg' and value[0] == 'False':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                            value[0] = 'True'
+                                #print('Variables after if is false: ' + str(variables))
+                            elif j.startswith('print'):
+                                jTemp = j.replace('print', "")
+                                
+                                try:
+                                    jTemp = jTemp.replace("--", "")
+                                except:
+                                    pass
+                                #print(jTemp)
+                                for k in printList:
+                                    if k == jTemp:
+                                        printList.remove(jTemp)
+                                        break
+                                #print(printList)
+
+                            elif j.startswith('move'):
+                                jTemp = j.replace('move', '')
+                                #print(j)
+                                moves.reverse()
+                                moves.remove(jTemp)
+                                moves.reverse()
+        try: 
+            for i in range(len(boolString)):
+                boolString.remove("True")
+        except ValueError:
+            pass
+        try: 
+            for i in range(len(boolString)):
+                boolString.remove("False")
+        except ValueError:
+            pass
+        try: 
+            for i in range(len(boolString)):
+                boolString.remove("")
+        except ValueError:
+            pass
+        enCasoStr = ''
+        for i in boolString:
+            enCasoStr += i + ';'
+
+        print(enCasoStr)
+
+        return enCasoStr
+
+
+    elif boolString.count("True") == 0:
+        enCasoStr = ''
+        for i in block:
+            enCasoStr += i + ';'
+
+        print(enCasoStr)
+
+        return enCasoStr
+
                         
-    return 'En caso'
+    
 
 def enCasoVerifier2(boolString, block):
     global cuandoEntonsList
     boolString = boolString.split(";")
+
+    #print(boolString)
+    #print(cuandoEntonsList)
+    #print(block)
 
     block = block.replace(";", ",")
     block = block.split(",")
@@ -697,7 +1339,7 @@ def enCasoVerifier2(boolString, block):
     #print('CuandoEntonsList: ' + str(cuandoEntonsList) + ' boolString: ' + str(boolString) + ' block: ' + str(block))
 
     if boolString.count("True") >= 1:
-        print('--Entered entons is true--')
+        #print('--Entered entons is true--')
         for i in block:
             if i.startswith('SET'):
                 i = i.replace('SET', '')
@@ -746,14 +1388,549 @@ def enCasoVerifier2(boolString, block):
                 moves.remove(i)
                 moves.reverse()
 
-                print(moves)
+            elif i.startswith('exec'):
+                i = i.replace('exec', '')
+                parametersTemp = i.split('&')
+                id = parametersTemp[0]
+                parametersTemp.pop(0)
+                for x in parametersTemp:
+                    if x == '':
+                        parametersTemp.remove(x)
+                #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+                for key, value in defRutinasDict.items():
+                    #print('key: ' + str(key) + ', value' + str(value[1]))
+                    if id == key:
+                        for j in value[1]:
+                            for idx, k in enumerate(value[0]):
+                                #print(k)
+                                #print(j.find(k) != -1)
+                                if j.find(k) != -1:
+                                    #print(k, parametersTemp[idx])
+                                    j = j.replace(k, parametersTemp[idx])
+                            #print('j: ' + str(j))
+                            if j.startswith('SET'):
+                                jTemp = j.replace('SET', '')
+                                jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                for key2, value2 in variables.items():
+                                    if key2 == jTemp[0]:
+                                        variables.pop(jTemp[0])
+                                        break
+
+                                #print(variables)
+
+                            elif j.startswith('bool'):
+                                jTemp = j.replace('bool', '')
+                                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                #print('Variable: ' + str(variable))
+                                variableTemp = variable[0]
+                                jTemp = jTemp[len(variableTemp):len(i)]
+                                jTemp = jTemp.split('&')
+                                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                                for key2, value2 in variables.items():
+                                    if key2 == variableTemp:
+                                        if jTemp[0] == '.Neg' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.Neg' and value[0] == 'False':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                            value[0] = 'True'
+                                #print('Variables after if is false: ' + str(variables))
+                            elif j.startswith('print'):
+                                jTemp = j.replace('print', "")
+                                
+                                try:
+                                    jTemp = jTemp.replace("--", "")
+                                except:
+                                    pass
+                                #print(jTemp)
+                                for k in printList:
+                                    if k == jTemp:
+                                        printList.remove(jTemp)
+                                        break
+                                #print(printList)
+
+                            elif j.startswith('move'):
+                                jTemp = j.replace('move', '')
+                                #print(j)
+                                moves.reverse()
+                                moves.remove(jTemp)
+                                moves.reverse()
+
+                #print(moves)
+
+                #print(moves)
 
     if boolString.count("True") >= 2:
-        print("--Entered entons is true 2--")
+        #print("--Entered entons is true 2--")
         check = True
         cuandoEntonsList.reverse()
         #print('CuandoEntonsList2: ' + str(cuandoEntonsList))
+        for item in cuandoEntonsList:
+            if item == '':
+                cuandoEntonsList.remove(item)
+        for index, item in enumerate(cuandoEntonsList):
+            #print("CuandoEntonsList: " + str(cuandoEntonsList))
+            #print("item: " + item)
+            if cuandoEntonsList.count("END") >= 1:
+                if item.startswith('SET'):
+                    item = item.replace('SET', '')
+                    for key, value in variables.items():
+                        if key == item:
+                            variables.pop(item)
+                            break
+                    cuandoEntonsList[index] = ''
+                    #print(variables)
+
+                elif item.startswith('bool'):
+                    item = item.replace('bool', '')
+                    variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', item)
+                    #print('Variable: ' + str(variable))
+                    variableTemp = variable[0]
+                    item = item[len(variableTemp):len(item)]
+                    item = item.split('&')
+                    #print('variable: ' + str(variable) + ' i: ' + str(i))
+                    for key, value in variables.items():
+                        if key == variableTemp:
+                            if item[0] == '.Neg' and value[0] == 'True':
+                                value[0] = 'False'
+                            elif item[0] == '.Neg' and value[0] == 'False':
+                                value[0] = 'True'
+                            elif item[0] == '.T' and item[1] == 'True' and value[0] == 'True':
+                                value[0] = 'True'
+                            elif item[0] == '.T' and item[1] == 'False' and value[0] == 'True':
+                                value[0] = 'False'
+                            elif item[0] == '.F' and item[1] == 'False' and value[0] == 'False':
+                                value[0] = 'False'
+                            elif item[0] == '.F' and item[1] == 'True' and value[0] == 'False':
+                                value[0] = 'True'
+                    #print('Variables after if is false: ' + str(variables))
+                    cuandoEntonsList[index] = ''
+
+                elif item.startswith('print'):
+                    item = item.replace('print', "")
+                    #print(i)
+                    for j in printList:
+                        if j == item:
+                            printList.remove(j)
+                            break
+                    #print(printList)
+                    cuandoEntonsList[index] = ''
+
+                elif item.startswith('move'):
+                    item = item.replace('move', '')
+                    moves.reverse()
+                    #print(moves)
+                    moves.remove(item)
+                    #print('after removed: ' + str(moves))
+                    moves.reverse()
+                    #print('after reverse: ' + str(moves))
+
+                    #print(moves)
+                    cuandoEntonsList[index] = ''
+
+                elif item.startswith('exec'):
+                    item = item.replace('exec', '')
+                    parametersTemp = item.split('&')
+                    id = parametersTemp[0]
+                    parametersTemp.pop(0)
+                    for x in parametersTemp:
+                        if x == '':
+                            parametersTemp.remove(x)
+                    #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+                    for key, value in defRutinasDict.items():
+                        #print('key: ' + str(key) + ', value' + str(value[1]))
+                        if id == key:
+                            for j in value[1]:
+                                for idx, k in enumerate(value[0]):
+                                    #print(k)
+                                    #print(j.find(k) != -1)
+                                    if j.find(k) != -1:
+                                        #print(k, parametersTemp[idx])
+                                        j = j.replace(k, parametersTemp[idx])
+                                #print('j: ' + str(j))
+                                if j.startswith('SET'):
+                                    jTemp = j.replace('SET', '')
+                                    jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                    for key2, value2 in variables.items():
+                                        if key2 == jTemp[0]:
+                                            variables.pop(jTemp[0])
+                                            break
+
+                                    #print(variables)
+
+                                elif j.startswith('bool'):
+                                    jTemp = j.replace('bool', '')
+                                    variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                    #print('Variable: ' + str(variable))
+                                    variableTemp = variable[0]
+                                    jTemp = jTemp[len(variableTemp):len(item)]
+                                    jTemp = jTemp.split('&')
+                                    #print('variable: ' + str(variable) + ' i: ' + str(i))
+                                    for key2, value2 in variables.items():
+                                        if key2 == variableTemp:
+                                            if jTemp[0] == '.Neg' and value[0] == 'True':
+                                                value[0] = 'False'
+                                            elif jTemp[0] == '.Neg' and value[0] == 'False':
+                                                value[0] = 'True'
+                                            elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                                value[0] = 'True'
+                                            elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                                value[0] = 'False'
+                                            elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                                value[0] = 'False'
+                                            elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                                value[0] = 'True'
+                                    #print('Variables after if is false: ' + str(variables))
+                                elif j.startswith('print'):
+                                    jTemp = j.replace('print', "")
+                                    
+                                    try:
+                                        jTemp = jTemp.replace("--", "")
+                                    except:
+                                        pass
+                                    #print(jTemp)
+                                    for k in printList:
+                                        if k == jTemp:
+                                            printList.remove(jTemp)
+                                            break
+                                    #print(printList)
+
+                                elif j.startswith('move'):
+                                    jTemp = j.replace('move', '')
+                                    #print(j)
+                                    moves.reverse()
+                                    moves.remove(jTemp)
+                                    moves.reverse()
+
+
+                    cuandoEntonsList[index] = ''
+
+                elif item.startswith('END'):
+                    cuandoEntonsList[index] = ''
+
+            elif cuandoEntonsList.count('END') == 0:
+                break
+
+            
+
+        #cuandoEntonsList.reverse()
+
+        try:
+            while True:
+                cuandoEntonsList.remove("")
+        except ValueError:
+            pass
+
+        enCasoStr = ''
         for i in cuandoEntonsList:
+            enCasoStr += i + ';'
+        
+        cuandoEntonsList.clear()
+        return enCasoStr
+
+
+    if boolString.count("True") == 0:
+        enCasoStr = ''
+        for i in block:
+            enCasoStr += i + ';'
+
+        cuandoEntonsList.clear()
+
+        return enCasoStr
+                        
+    
+def defRutinas(id, parameters, block):
+    global defRutinasDict
+    rutinasListTemp = []
+    parametersTemp = []
+    check = True
+
+    #print(block)
+
+    for x in defRutinasDict:
+        if x == id:
+            check = False
+            break
+        else:
+            pass
+    
+    if check:
+        try:
+            parametersTemp = parameters.split(",")
+        except:
+            pass
+
+        
+        block = block.replace("None", "")
+        block = block.replace(";", ",")
+        block = block.split(",")
+
+        for i in block:
+            if i == 'None':
+                block.remove(i)
+        try:
+            block.remove('None')
+        except:
+            pass
+
+        try: 
+            while True:
+                block.remove("True")
+        except ValueError:
+            pass
+
+        try: 
+            while True:
+                block.remove("False")
+        except ValueError:
+            pass
+
+        try: 
+            while True:
+                block.remove("")
+        except ValueError:
+            pass
+
+        #print(block)
+
+        for i in block:
+            if i.startswith('SET'):
+                i = i.replace('SET', '')
+                for key, value in variables.items():
+                    if key == i:
+                        #varsTemp.append("SET" + str(key) + "," + str(value[0]))
+                        #print(str(key) + str(value[0]))
+                        rutinasListTemp.append('SET' + i + ',' + str(value[0]))
+                        variables.pop(i)
+                        break
+
+                #print(variables)
+
+            elif i.startswith('bool'):
+                rutinasListTemp.append(i)
+                i = i.replace('bool', '')
+                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', i)
+                #print('Variable: ' + str(variable))
+                variableTemp = variable[0]
+                i = i[len(variableTemp):len(i)]
+                i = i.split('&')
+                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                for key, value in variables.items():
+                    if key == variableTemp:
+                        if i[0] == '.Neg' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.Neg' and value[0] == 'False':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'True' and value[0] == 'True':
+                            value[0] = 'True'
+                        elif i[0] == '.T' and i[1] == 'False' and value[0] == 'True':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'False' and value[0] == 'False':
+                            value[0] = 'False'
+                        elif i[0] == '.F' and i[1] == 'True' and value[0] == 'False':
+                            value[0] = 'True'
+                #print('Variables after if is false: ' + str(variables))
+            elif i.startswith('print'):
+                rutinasListTemp.append(i)
+                i = i.replace('print', "")
+                for j in printList:
+                    if j == i:
+                        printList.remove(j)
+                        break
+
+            elif i.startswith('move'):
+                rutinasListTemp.append(i)
+                i = i.replace('move', '')
+                moves.reverse()
+                moves.remove(i)
+                moves.reverse()
+
+                #print(moves)
+
+            elif i.startswith('exec'):
+                rutinasListTemp.append(i)
+                print(i)
+                print(rutinasListTemp)
+                i = i.replace('exec', '')
+                parametersTemp = i.split('&')
+                id = parametersTemp[0]
+                parametersTemp.pop(0)
+                for x in parametersTemp:
+                    if x == '':
+                        parametersTemp.remove(x)
+                #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+                for key, value in defRutinasDict.items():
+                    #print('key: ' + str(key) + ', value' + str(value[1]))
+                    if id == key:
+                        for j in value[1]:
+                            for idx, k in enumerate(value[0]):
+                                #print(k)
+                                #print(j.find(k) != -1)
+                                if j.find(k) != -1:
+                                    #print(k, parametersTemp[idx])
+                                    j = j.replace(k, parametersTemp[idx])
+                            #print('j: ' + str(j))
+                            if j.startswith('SET'):
+                                jTemp = j.replace('SET', '')
+                                jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                for key2, value2 in variables.items():
+                                    if key2 == jTemp[0]:
+                                        variables.pop(jTemp[0])
+                                        break
+
+                                #print(variables)
+
+                            elif j.startswith('bool'):
+                                jTemp = j.replace('bool', '')
+                                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                #print('Variable: ' + str(variable))
+                                variableTemp = variable[0]
+                                jTemp = jTemp[len(variableTemp):len(i)]
+                                jTemp = jTemp.split('&')
+                                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                                for key2, value2 in variables.items():
+                                    if key2 == variableTemp:
+                                        if jTemp[0] == '.Neg' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.Neg' and value[0] == 'False':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                            value[0] = 'True'
+                                #print('Variables after if is false: ' + str(variables))
+                            elif j.startswith('print'):
+                                jTemp = j.replace('print', "")
+                                
+                                try:
+                                    jTemp = jTemp.replace("--", "")
+                                except:
+                                    pass
+                                #print(jTemp)
+                                for k in printList:
+                                    if k == jTemp:
+                                        printList.remove(jTemp)
+                                        break
+                                #print(printList)
+
+                            elif j.startswith('move'):
+                                jTemp = j.replace('move', '')
+                                #print(j)
+                                moves.reverse()
+                                moves.remove(jTemp)
+                                moves.reverse()
+
+                            elif j.startswith('exec'):
+                                j = j.replace('exec', '')
+                                parametersTemp = j.split('&')
+                                id = parametersTemp[0]
+                                parametersTemp.pop(0)
+                                for x in parametersTemp:
+                                    if x == '':
+                                        parametersTemp.remove(x)
+                                #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+                                for key, value in defRutinasDict.items():
+                                    #print('key: ' + str(key) + ', value' + str(value[1]))
+                                    if id == key:
+                                        for j2 in value[1]:
+                                            for idx, k in enumerate(value[0]):
+                                                #print(k)
+                                                #print(j.find(k) != -1)
+                                                if j2.find(k) != -1:
+                                                    #print(k, parametersTemp[idx])
+                                                    j2 = j2.replace(k, parametersTemp[idx])
+                                            #print('j: ' + str(j))
+                                            if j2.startswith('SET'):
+                                                jTemp = j2.replace('SET', '')
+                                                jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                                for key2, value2 in variables.items():
+                                                    if key2 == jTemp[0]:
+                                                        variables.pop(jTemp[0])
+                                                        break
+
+                                                #print(variables)
+
+                                            elif j2.startswith('bool'):
+                                                jTemp = j2.replace('bool', '')
+                                                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                                #print('Variable: ' + str(variable))
+                                                variableTemp = variable[0]
+                                                jTemp = jTemp[len(variableTemp):len(i)]
+                                                jTemp = jTemp.split('&')
+                                                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                                                for key2, value2 in variables.items():
+                                                    if key2 == variableTemp:
+                                                        if jTemp[0] == '.Neg' and value[0] == 'True':
+                                                            value[0] = 'False'
+                                                        elif jTemp[0] == '.Neg' and value[0] == 'False':
+                                                            value[0] = 'True'
+                                                        elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                                            value[0] = 'True'
+                                                        elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                                            value[0] = 'False'
+                                                        elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                                            value[0] = 'False'
+                                                        elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                                            value[0] = 'True'
+                                                #print('Variables after if is false: ' + str(variables))
+                                            elif j2.startswith('print'):
+                                                jTemp = j2.replace('print', "")
+                                                
+                                                try:
+                                                    jTemp = jTemp.replace("--", "")
+                                                except:
+                                                    pass
+                                                #print(jTemp)
+                                                for k in printList:
+                                                    if k == jTemp:
+                                                        printList.remove(jTemp)
+                                                        break
+                                                #print(printList)
+
+                                            elif j2.startswith('move'):
+                                                jTemp = j2.replace('move', '')
+                                                #print(j)
+                                                moves.reverse()
+                                                moves.remove(jTemp)
+                                                moves.reverse()
+
+        defRutinasDict[id] = [parametersTemp, rutinasListTemp]
+        #print('defRutinasDict: ' + str(defRutinasDict))
+        #print('id: ' + str(id) + ', parameters: ' + str(parametersTemp) + ', block: ' + str(block))
+
+    else:
+        print("Error semantico, la nombre de la rutina utilizada ya existe")
+
+def defPrincipal(block):
+    global contador
+
+    if contador == 0:
+        contador += 1
+        pass
+    elif contador != 0:
+
+        print("Error semantico, no se puede tener dos rutinas principales definidas")
+        block = block.replace(";", ",")
+        block = block.split(",")
+        for i in block:
+            if i == 'None':
+                block.remove(i)
+        try:
+            block.remove('None')
+        except:
+            pass
+
+        for i in block:
             if i.startswith('SET'):
                 i = i.replace('SET', '')
                 for key, value in variables.items():
@@ -801,14 +1978,146 @@ def enCasoVerifier2(boolString, block):
                 moves.remove(i)
                 moves.reverse()
 
-                print(moves)
+                #print(moves)
 
-            if i.startswith("END"):
-                if check:
-                    check = False
-                    pass
-                elif not(check):
-                    break
-                        
-    cuandoEntonsList.clear()
-    return 'En caso2'
+            elif i.startswith('exec'):
+                i = i.replace('exec', '')
+                parametersTemp = i.split('&')
+                id = parametersTemp[0]
+                parametersTemp.pop(0)
+                for x in parametersTemp:
+                    if x == '':
+                        parametersTemp.remove(x)
+                #print('params: ' + str(parametersTemp) + ', id: ' + str(id))
+                for key, value in defRutinasDict.items():
+                    #print('key: ' + str(key) + ', value' + str(value[1]))
+                    if id == key:
+                        for j in value[1]:
+                            for idx, k in enumerate(value[0]):
+                                #print(k)
+                                #print(j.find(k) != -1)
+                                if j.find(k) != -1:
+                                    #print(k, parametersTemp[idx])
+                                    j = j.replace(k, parametersTemp[idx])
+                            #print('j: ' + str(j))
+                            if j.startswith('SET'):
+                                jTemp = j.replace('SET', '')
+                                jTemp = re.match(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                for key2, value2 in variables.items():
+                                    if key2 == jTemp[0]:
+                                        variables.pop(jTemp[0])
+                                        break
+
+                                #print(variables)
+
+                            elif j.startswith('bool'):
+                                jTemp = j.replace('bool', '')
+                                variable = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}', jTemp)
+                                #print('Variable: ' + str(variable))
+                                variableTemp = variable[0]
+                                jTemp = jTemp[len(variableTemp):len(i)]
+                                jTemp = jTemp.split('&')
+                                #print('variable: ' + str(variable) + ' i: ' + str(i))
+                                for key2, value2 in variables.items():
+                                    if key2 == variableTemp:
+                                        if jTemp[0] == '.Neg' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.Neg' and value[0] == 'False':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'True' and value[0] == 'True':
+                                            value[0] = 'True'
+                                        elif jTemp[0] == '.T' and jTemp[1] == 'False' and value[0] == 'True':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'False' and value[0] == 'False':
+                                            value[0] = 'False'
+                                        elif jTemp[0] == '.F' and jTemp[1] == 'True' and value[0] == 'False':
+                                            value[0] = 'True'
+                                #print('Variables after if is false: ' + str(variables))
+                            elif j.startswith('print'):
+                                jTemp = j.replace('print', "")
+                                
+                                try:
+                                    jTemp = jTemp.replace("--", "")
+                                except:
+                                    pass
+                                #print(jTemp)
+                                for k in printList:
+                                    if k == jTemp:
+                                        printList.remove(jTemp)
+                                        break
+                                #print(printList)
+
+                            elif j.startswith('move'):
+                                jTemp = j.replace('move', '')
+                                #print(j)
+                                moves.reverse()
+                                moves.remove(jTemp)
+                                moves.reverse()
+
+
+def execRutinas(id, parameters):
+    global defRutinasDict
+    parametersTemp = []
+    #check = True
+    try:
+        parametersTemp = parameters.split(",")
+    except:
+        pass
+
+    for key, value in variables.items():
+            for idx, i in enumerate(parametersTemp):
+                if key == i:
+                    parametersTemp[idx] = value[0]
+
+    #print(parameters)
+    
+    for key, value in defRutinasDict.items():
+        #print('parametersGiven: ' + str(len(parametersTemp)) + ', parametersNeeded: ' + str(len(value[0])))
+        if key == id and len(parametersTemp) == len(value[0]):
+            for i in value[1]:
+                for idx, j in enumerate(value[0]):
+                    if i.find(j) != -1:
+                        i = i.replace(j, parametersTemp[idx])
+                    for idx2, k in enumerate(variablesTemp):
+                        if k[1] == j:
+                            tempVar = k[1].replace(j, parametersTemp[idx])
+                            varDeclaration(k[0], tempVar)
+                            #variablesTemp.pop(idx2)
+                if i.startswith("SET"):
+                    iTemp = i.replace("SET", "")
+                    iTemp2 = re.findall(r'\@[a-zA-Z0-9\?\_]{2,9}',iTemp)
+                    varDeclaration(iTemp2[0], iTemp[len(iTemp2[0]) + 1:len(iTemp)])
+                if i.startswith("print"):
+                    iTemp = i.replace("print", "")
+                    try:
+                        iTemp = iTemp.replace("--", "")
+                    except:
+                        pass
+                    printList.append(iTemp)
+                if i.startswith("move"):
+                    iTemp = i.replace("move", "")
+                    moves.append(iTemp)
+
+        elif key == id and len(parametersTemp) > len(value[0]):
+            print("Error semantico, la rutina necesita menos parametros de los brindados" + id)
+        elif key == id and len(parametersTemp) < len(value[0]):
+            print("Error semantico, la rutina necesita mas parametros de los brindados" + id)
+        elif key != id:
+            pass     
+        else:
+            print("Error semantico, la rutina no existe")
+
+    for key, value in varsTemp.items():
+        varDeclaration(key, value[0])
+
+    varsTemp.clear()
+
+    parametersTempTemp = ''
+    for i in parametersTemp:
+        parametersTempTemp += i + '&'
+
+    
+
+    #print('exec' + str(id) + '&' + str(parametersTempTemp))
+
+    return 'exec' + str(id) + '&' + str(parametersTempTemp)
