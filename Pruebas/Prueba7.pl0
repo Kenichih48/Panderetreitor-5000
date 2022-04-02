@@ -1,16 +1,18 @@
 SET @abc, 4;
 
 EnCaso @abc
-    Cuando <= 3 EnTons {
-        Golpe();
+    Cuando >= 3 EnTons {
+        Percutor(B);
         Golpe();
         Percutor(A);
     };
-    Cuando <= 3 EnTons {
+    Cuando >= 3 EnTons {
         Percutor(A);
+        Golpe();
     };
     Cuando <= 3 EnTons {
         Vibrato(12);
+        Golpe();
     };
 SiNo {
     Golpe();

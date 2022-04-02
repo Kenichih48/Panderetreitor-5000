@@ -1,2 +1,11 @@
-SET @curso, 3;
-println!("Este es el proyecto numero ", @curso, " de Compiladores ", 2022);
+SET @asdf, 10;
+println!(@asdf);
+
+Def @MiRutina() {
+    SET @asdf, 5;
+    println!(@asdf);
+};
+
+println!(@asdf);
+
+Exec @MiRutina();

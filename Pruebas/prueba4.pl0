@@ -1,18 +1,27 @@
 SET @x2, True;
 SET @x1, 3;
+
 For @var1 to @x1 Step 1 {
     SET @x3, @var1;
+    SET @x2.Neg;
 };
 
 For @var1 to 2 Step 1 {
-    Golpe();
+    println!("@var1: ", @var1);
 };
 
 For @var2 to 4 {
     Abanico(B);
 };
 
-SET @var6, 3;
-For @var6 to 9 Step 3 {
+SET @var6, 6;
+For @var6 to 12 Step 3 {
     Vertical(D);
 };
+
+For @var1 to 3 {
+    Golpe();
+};
+
+println!("@x2: ", @x2);
+println!("@x1: ", @x1);

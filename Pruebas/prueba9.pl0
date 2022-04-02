@@ -1,4 +1,8 @@
-SET @id, True;
-SET @id.Neg;
-SET @id.T;
-SET @id.F;
+For @variable1 to 3 {
+    SET @variable2, @variable1;
+};
+
+For @variable1 to 2 {
+    SET @variable3, True;
+    SET @variable3.Neg;
+};
