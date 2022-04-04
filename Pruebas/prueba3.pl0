@@ -1,0 +1,11 @@
+Golpe();
+If 3 * 2 == True { 
+    Golpe();
+};
+
+If 3 > 3 {
+    Abanico(A);
+}
+Else {
+    Abanico(B);
+};

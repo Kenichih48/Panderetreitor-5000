@@ -1,5 +1,22 @@
-SET @asdf, True;
+SET @Var, 5;
+If @Var == 5 {
+    Percutor(A);
+}; 
 
-If 12 > 4 {
-    SET @zxcv, 12;
+If 1 + 2 == 3 {
+    Percutor(B);
+};
+
+SET @Var1, 3;
+If @Var1 * 2 == 6 {
+    Golpe();
+}; 
+
+SET @Var2, True;
+If @Var2 == True {
+    println!("Hola Mundo");
+};
+
+If True {
+    SET @Variable, 12;
 };

@@ -1,0 +1,22 @@
+Def @MiRutina2() {
+    SET @x1, 4;
+    println!(@x1);
+};
+
+Def @MiRutina(@dato1) {
+    println!("Desde la rutina: ", @dato1);
+};
+
+Def Principal() {
+    SET @Variable1, 5;
+    SET @x1, 20;
+    SET @y3, 15;
+    SET @variable, False;
+
+    Exec @MiRutina(2);
+    Exec @MiRutina(@Variable1);
+
+    Exec @MiRutina2();
+
+    println!(@x1);
+};

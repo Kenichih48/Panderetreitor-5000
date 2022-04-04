@@ -1,0 +1,10 @@
+Def @MiRutina() {
+	SET @var1, 5;
+	SET @var1, False;
+	SET @var2, True;
+	SET @var2, 10;
+};
+
+Def Principal() {
+	Exec @MiRutina();
+};

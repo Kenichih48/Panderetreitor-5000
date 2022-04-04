@@ -1,4 +1,4 @@
-from ply.lex import lex as lex
+from ply.lex import lex
 import re
 import codecs
 import os
@@ -13,7 +13,7 @@ reservadas = ['NEGATE', 'MTRUE', 'MFALSE', 'ABANICO', 'VERTICAL', 'PERCUTOR', 'G
 tokens = reservadas + ['ID', 'SET', 'NUMBER', 'BOOL', 'COMMA', 'SEMICOLON',
                        'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EXPONENT', 'WDIVIDE',
                        'MODULE', 'LPARENTHESES', 'RPARENTHESES', 'LBRACKET', 'RBRACKET', 'STRING',
-                       'EQUAL', 'NEQUAL', 'GT', 'GTE', 'LT', 'LTE']
+                       'EQUAL', 'NEQUAL', 'GT', 'GTE', 'LT', 'LTE', 'TYPE', 'ELSE']
 
 t_ignore = '\t '
 t_BOOL = r'(True|False)'
@@ -36,7 +36,7 @@ t_GT = r'>'
 t_GTE = r'>='
 t_LT = r'<'
 t_LTE = r'<='
-t_STRING = r'"[\w\W\s\S\d]*"'
+t_STRING = r'"[\:\@\!\?\_\w\s\d]*"'
 t_ENCASO = r'EnCaso'
 t_SINO = r'SiNo'
 t_FINENCASO = r'Fin-EnCaso'
@@ -53,13 +53,15 @@ t_TO = r'to'
 t_FOR = r'For'
 t_STEP = r'Step'
 t_IF = r'If'
+t_ELSE = r'Else'
+t_TYPE = r'type'
 t_PRINCIPAL = r'Principal\(\)'
 t_ABANICO = r'Abanico\((A|B)\)'
 t_VERTICAL = r'Vertical\((D|I)\)'
 t_PERCUTOR = r'Percutor\((D|I|DI|A|B|AB)\)'
 t_GOLPE = r'Golpe\(\)'
 t_VIBRATO = r'Vibrato\(\d+\)'
-t_METRONOMO = r'Metronomo\((A|B),\d+.*(\d+)*\)|Metronomo\((A|B),\s\d+.*(\d+)*\)'
+t_METRONOMO = r'Metronomo\((A|D),\d+.*(\d+)*\)|Metronomo\((A|D),\s\d+.*(\d+)*\)'
 
 def t_ID(t):
     r'\@[a-zA-Z0-9\?\_]{2,9}'
@@ -166,24 +168,25 @@ def buscarFicheros(directorio):
     return files[int(numArchivo) - 1]
 
 
-directorio = "C:/Users/quigo/AndroidStudioProjects/TareaExtraclase42/Tambarduine/Pruebas/"
+#directorio = "C:/Users/quigo/AndroidStudioProjects/TareaExtraclase42/Tambarduine/Pruebas/"
 directorio = "/home/kash/Documents/GitHub/Tambarduine/Pruebas/"
-archivo = buscarFicheros(directorio)
-test = directorio + archivo
-fp = codecs.open(test, "r", "utf-8")
-cadena = fp.read()
-fp.close()
+#archivo = buscarFicheros(directorio)
+#test = directorio + archivo
+#fp = codecs.open(test, "r", "utf-8")
+#cadena = fp.read()
+#fp.close()
 
-analizador = lex()
-analizador.input(cadena)
+lexer = lex()
+#analizador = lex()
+#analizador.input(cadena)
 #contador = 0
 
-while True:
-    tok = analizador.token()
-    if not tok: break
+#while True:
+#    tok = analizador.token()
+#    if not tok: break
     #if contador == tok.lexpos - 1: print('space')
     #else: print('no space')
     #print('contador: ' + str(contador) + ', lexpos: ' + str(tok.lexpos - 1))
     #contador = len(str(tok.value)) + tok.lexpos
 
-    print(tok)
+#    print(tok)
