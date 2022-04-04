@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 import threading
 import time
+from analizadorSintactico import *
 
 #root window
 root = Tk()
@@ -19,7 +20,8 @@ Definicion de funcion: Accion del boton de compilar y correr
 '''
 def comp_run():
     global errors_names
-
+    
+    
     
     for i in errors_names:
         print("erasing error: "+i)
@@ -29,10 +31,32 @@ def comp_run():
     #error_list = []
     if not errorFoundLine(error_list):
         
-        text_output.configure(state='normal')
-        text_output.delete('1.0', END)
-        text_output.insert('1.0',"Hey! You ran and compiled the code :)")
-        text_output.configure(state='disabled')
+        #text_output.configure(state='normal')
+        #text_output.delete('1.0', END)
+        #text_output.insert('1.0',"Hey! You ran and compiled the code :)")
+        #text_output.configure(state='disabled')
+
+        with open('temp.pl0', 'w') as file:
+            code = text_info.get('1.0', END)
+            file.write(code)
+        
+        run()
+
+        if len(errorList) > 0:
+            errorList.reverse()
+            for i in errorList:
+                text_output.configure(state='normal')
+                text_output.insert('1.0', i[0])
+                text_output.insert('1.0', "\n")
+                text_output.configure(state='disabled')
+        else:
+            printList.reverse()
+
+            for i in printList:
+                text_output.configure(state='normal')
+                text_output.insert('1.0', i)
+                text_output.insert('1.0', "\n")
+                text_output.configure(state='disabled')
 
     else:
         text_output.configure(state='normal')

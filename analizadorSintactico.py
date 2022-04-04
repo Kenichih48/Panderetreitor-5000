@@ -24,14 +24,17 @@ precedence = (
    ('left','LPARENTHESES','RPARENTHESES'),
    )
 
+#Whole coding from user verified here
 def p_program(p):
     '''program : funcList'''
     print('Variables: ' + str(returnVariables()) + ', Moves: ' + str(returnMoves()) + ', PrintList: ' + str(returnPrintList()))
 
+#Variables, movements, procedures and statements checked here
 def p_block(p):
     '''block : varDecl moveDecl procDecl statementDecl''' #funcDecl enCasoDecl'''
     p[0] = str(p[1]) + ',' + str(p[2]) + ',' + str(p[3]) + ',' + str(p[4])
 
+#List of blocks
 def p_blockList1(p):
     '''blockList : block'''
     p[0] = p[1]
@@ -40,6 +43,7 @@ def p_blockList2(p):
     '''blockList : blockList block'''
     p[0] = p[1] + p[2]
 
+#List of functions
 def p_funcList1(p):
     '''funcList : funcDecl'''
     p[0] = p[1]
@@ -48,6 +52,7 @@ def p_funcList2(p):
     '''funcList : funcList funcDecl'''
     p[0] = p[1] + p[2]
 
+#Variable declaration checked here
 def p_varDecl1(p):
     '''varDecl : varDeclList SEMICOLON'''
     p[0] = p[1]
@@ -58,15 +63,15 @@ def p_varDeclEmpty(p):
 
 def p_varDeclSt1(p):
     '''varDeclSt : SET ID COMMA factor'''
-    p[0] = varDeclaration(p[2], p[4], p.lineno)#.returnVariable()
+    p[0] = varDeclaration(p[2], p[4], p.lineno(1))#.returnVariable()
 
 def p_varDeclSt2(p):
     '''varDeclSt : SET ID COMMA arithOperationList'''
-    p[0] = varDeclaration(p[2], arithOperation(p[4], p.lineno), p.lineno)#.returnVariable
+    p[0] = varDeclaration(p[2], arithOperation(p[4], p.lineno(1)), p.lineno(1))#.returnVariable
 
 def p_varDeclSt3(p):
     '''varDeclSt : SET ID boolOperation'''
-    p[0] = boolOperation(p[2], p[3], p.lineno)
+    p[0] = boolOperation(p[2], p[3], p.lineno(1))
 
 def p_varDeclList1(p):
     '''varDeclList : varDeclSt'''
@@ -76,6 +81,7 @@ def p_varDeclList2(p):
     '''varDeclList : varDeclList SEMICOLON varDeclSt'''
     p[0] = str(p[1]) + p[2] + str(p[3])
 
+#Arithmetic Operation checked here
 def p_arithOperList1(p):
     '''arithOperationList : arithOperation'''
     p[0] = p[1]
@@ -116,6 +122,7 @@ def p_arithOper5(p):
     '''arithOperation : MINUS ID'''
     p[0] = p[1] + p[2]
 
+#Boolean operators checked here
 def p_boolOper1(p):
     '''boolOperation : NEGATE'''
     p[0] = p[1]
@@ -128,6 +135,7 @@ def p_boolOper3(p):
     '''boolOperation : MFALSE'''
     p[0] = p[1]
 
+#Movement Declaration checked here
 def p_moveDecl1(p):
     '''moveDecl : moveDeclList SEMICOLON'''
     p[0] = p[1]
@@ -168,6 +176,7 @@ def p_moveDeclSt6(p):
     '''moveDeclSt : METRONOMO'''
     p[0] = Metronomo(p[1])
 
+#Procedure Declarations checked here
 def p_procDecl1(p):
     '''procDecl : procDeclList SEMICOLON''' 
     p[0] = p[1]
@@ -190,8 +199,9 @@ def p_procDeclSt1(p):
 
 def p_procDeclSt4(p):
     '''procDeclSt : EXEC ID LPARENTHESES parameter RPARENTHESES'''
-    p[0] = execRutinas(p[2], p[4], p.lineno)
+    p[0] = execRutinas(p[2], p[4], p.lineno(1))
 
+#Function declarations checked here
 def p_funcDecl1(p):
     '''funcDecl : funcDeclList SEMICOLON'''
     p[0] = p[1]
@@ -210,12 +220,13 @@ def p_funcDeclList2(p):
 
 def p_funcDeclSt1(p):
     '''funcDeclSt : DEF ID LPARENTHESES parameter RPARENTHESES LBRACKET blockList RBRACKET'''
-    p[0] = defRutinas(p[2], p[4], p[7], p.lineno)
+    p[0] = defRutinas(p[2], p[4], p[7], p.lineno(1))
  
 def p_funcDeclSt2(p):
     '''funcDeclSt : DEF PRINCIPAL LBRACKET blockList RBRACKET'''
-    p[0] = defPrincipal(p[4], p.lineno)
+    p[0] = defPrincipal(p[4], p.lineno(1))
 
+#Parameters checked here
 def p_parameter1(p):
     '''parameter : parameterList'''
     p[0] = p[1]
@@ -232,9 +243,11 @@ def p_parameterList2(p):
     '''parameterList : parameterList COMMA factor'''
     p[0] = p[1] + p[2] + p[3]
 
+#Statement Declaration checked here
 def p_statementDecl1(p):
     '''statementDecl : statementList SEMICOLON'''
     p[0] = p[1]
+
 def p_statementDeclEmpty(p):
 	'''statementDecl : empty'''
 	p[0] = p[1]
@@ -249,24 +262,24 @@ def p_statementList2(p):
 
 def p_statement1(p):
     '''statement : IF condition LBRACKET blockList RBRACKET'''
-    p[0] = ifVerifier(p[2], p[4], '', p.lineno)
+    p[0] = ifVerifier(p[2], p[4], '', p.lineno(1))
 
 def p_statement2(p):
     '''statement : IF condition LBRACKET blockList RBRACKET ELSE LBRACKET blockList RBRACKET'''
-    p[0] = ifVerifier(p[2], p[4], p[8], p.lineno)
+    p[0] = ifVerifier(p[2], p[4], p[8], p.lineno(1))
 
 def p_statement3(p):
     '''statement : FOR ID TO factor STEP NUMBER LBRACKET blockList RBRACKET'''
-    p[0] = forVerifier(p[2], p[4], p[6], p[8], p.lineno)
+    p[0] = forVerifier(p[2], p[4], p[6], p[8], p.lineno(1))
 
 def p_statement4(p):
     '''statement : FOR ID TO factor LBRACKET blockList RBRACKET'''
-    p[0] = forVerifier(p[2], p[4], '1', p[6], p.lineno)
+    p[0] = forVerifier(p[2], p[4], '1', p[6], p.lineno(1))
 
 def p_statement5(p):
     '''statement : ENCASO cuandoEntonsList SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
     #print('encaso 1')
-    p[0] = enCasoVerifier(p[2], p[6], p.lineno)
+    p[0] = enCasoVerifier(p[2], p[6], p.lineno(1))
 
 def p_statement6(p):
     '''statement : ENCASO ID cuandoEntonsListAux SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
@@ -277,10 +290,11 @@ def p_statement6(p):
         i = i.split(',')
         for j in i[1:len(i)]:
             string += j + ','
-        p[3] += ifVerifier2(i[0], string, p.lineno) + ";"
+        p[3] += ifVerifier2(i[0], string, p.lineno(1)) + ";"
 
-    p[0] = enCasoVerifier2(p[3], p[7], p.lineno)
+    p[0] = enCasoVerifier2(p[3], p[7], p.lineno(1))
 
+#Sentencias condicionales checked here
 def p_cuandoEntonsList1(p):
     '''cuandoEntonsList : cuandoEntons'''
     p[0] = p[1]
@@ -292,7 +306,7 @@ def p_cuandoEntonsList2(p):
 def p_cuandoEntons1(p):
     '''cuandoEntons : CUANDO ID relation factor ENTONS LBRACKET blockList RBRACKET'''
     #print('encaso 3')
-    p[0] = ifVerifier((p[2] + p[3] + p[4]), p[7], '', p.lineno)
+    p[0] = ifVerifier((p[2] + p[3] + p[4]), p[7], '', p.lineno(1))
 
 def p_cuandoEntonsAux1(p):
     '''cuandoEntonsAux : CUANDO relation factor ENTONS LBRACKET blockList RBRACKET'''
@@ -308,6 +322,7 @@ def p_cuandoEntonsListAux2(p):
     '''cuandoEntonsListAux : cuandoEntonsListAux SEMICOLON cuandoEntonsAux'''
     p[0] = p[1] + p[2] + p[3]
 
+#Conditions checked here
 def p_condition1(p):
 	'''condition : arithOperation relation arithOperation'''
 	p[0] = p[1] + p[2] + p[3]
@@ -328,6 +343,7 @@ def p_condition5(p):
     '''condition : factor'''
     p[0] = p[1]
 
+#Prints checked here
 def p_toPrint1(p):
     '''toPrint : toPrintList'''
     p[0] = p[1]
@@ -352,6 +368,7 @@ def p_toPrintSt2(p):
     '''toPrintSt : factor'''
     p[0] = addPrintPar2(p[1])
 
+#Relations checked here
 def p_relation1(p):
     '''relation : EQUAL'''
     p[0] = p[1]
@@ -376,6 +393,7 @@ def p_relation6(p):
     '''relation : GTE'''
     p[0] = p[1]
 
+#Arithmetic Operators checked here
 def p_addingOperator1(p):
     '''addingOperator : PLUS'''
     p[0] = p[1]
@@ -396,6 +414,7 @@ def p_multiplyingOperator3(p):
     '''multiplyingOperator : WDIVIDE'''
     p[0] = p[1]
 
+#Factors checked here
 def p_factor1(p):
     '''factor : ID'''
     p[0] = p[1]
@@ -412,12 +431,14 @@ def p_factor4(p):
     '''factor : BOOL'''
     p[0] = p[1]
 
+#Empty
 def p_empty(p):
 	'''empty :'''
 	pass
 
+#Error checker
 def p_error(p):
-	print ("Error de sintaxis ", p.lineno)    
+	errorList.append("Error de sintaxis " + str(p.type), p.lineno(1))    
 
 def buscarFicheros(directorio):
 	ficheros = []
@@ -443,14 +464,17 @@ def buscarFicheros(directorio):
 
 	return files[int(numArchivo)-1]
 
-directorio = '/home/kash/Documents/GitHub/Tambarduine/Pruebas/'
-archivo = buscarFicheros(directorio)
-test = directorio+archivo
-fp = codecs.open(test,"r","utf-8")
-cadena = fp.read()
-fp.close()
+def run():
+    directorio = '/home/kash/Documents/GitHub/Tambarduine/'
+    archivo = 'temp.pl0'
+    test = directorio+archivo
+    fp = codecs.open(test,"r","utf-8")
+    cadena = fp.read()
+    fp.close()
 
-parser = yacc()
-result = parser.parse(cadena)
+    parser = yacc()
+    result = parser.parse(cadena)
 
-print (result)
+    print (result)
+
+#run()
