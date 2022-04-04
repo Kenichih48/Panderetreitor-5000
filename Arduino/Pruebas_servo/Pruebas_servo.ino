@@ -40,7 +40,7 @@ void setup() {
  
 
   servoEje2.attach(6);
-  servoEje1.attach(3);
+  servoEje1.attach(12);
   servoGolpe1.attach(4);
   servoGolpe2.attach(5);
   servoGolpe3.attach(7);
@@ -50,7 +50,7 @@ void setup() {
   EasyBuzzer.setPin(9);
   
   
-  servoEje1.write(90);
+  servoEje1.write(80);
   servoEje2.write(90);
   servoGolpe1.write(90);
   servoGolpe2.write(90);
@@ -172,19 +172,19 @@ void performMovement(){
   }else if (movement[lastMove] == 'B'){
     servoEje1.write(135);
   }else if (movement[lastMove] == 'D'){
-    servoEje2.write(45);
+    servoEje2.write(65);
   }else if (movement[lastMove] == 'I'){
-    servoEje2.write(135);
+    servoEje2.write(115);
   }else if (movement[lastMove] == 'G'){
-    servoGolpe3.write(145);
+    servoGolpe3.write(115);
   }else if (movement[lastMove] == 'R'){
     servoGolpe1.write(60);
   }else if (movement[lastMove] == 'L'){
     servoGolpe2.write(120);
   }else if (movement[lastMove] == 'U'){
-    servoGolpe4.write(120);
+    servoGolpe4.write(115);
   }else if (movement[lastMove] == 'O'){
-    servoGolpe5.write(120);
+    servoGolpe5.write(105);
   }else if (movement[lastMove] == 'X'){
     servoGolpe1.write(45);
     servoGolpe2.write(120);
@@ -200,7 +200,7 @@ void performMovement(){
  */
 void returnMoves(){
   if (movement[lastMove-1] == 'A' || movement[lastMove-1] == 'B'){
-    servoEje1.write(90);
+    servoEje1.write(80);
   }else if (movement[lastMove-1] == 'D' || movement[lastMove-1] == 'I'){
     servoEje2.write(90);
   }else if (movement[lastMove-1] == 'G'){
