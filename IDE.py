@@ -64,6 +64,9 @@ def comp_run():
                 arduino.add_metronome(j)
             else:
                 arduino.add_pila(j)
+
+        arduino.send_data()
+        arduino.reset()
     else:
         for i in errorList:
             text_output.configure(state='normal')
