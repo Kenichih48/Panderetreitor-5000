@@ -368,6 +368,10 @@ def p_toPrintSt2(p):
     '''toPrintSt : factor'''
     p[0] = addPrintPar2(p[1])
 
+def p_toPrintSt3(p):
+    '''toPrintSt : TYPE LPARENTHESES ID RPARENTHESES'''
+    p[0] = addPrintPar3(p[3], p.lineno(3))
+
 #Relations checked here
 def p_relation1(p):
     '''relation : EQUAL'''
@@ -438,7 +442,7 @@ def p_empty(p):
 
 #Error checker
 def p_error(p):
-	errorList.append(["Error de sintaxis " + str(p.type()), p.lineno(1)])    
+	errorList.append(["Error de sintaxis " + str(p.value), p.lexer.lineno])#p.lineno(1)])    
 
 def buscarFicheros(directorio):
 	ficheros = []

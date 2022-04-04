@@ -3,6 +3,7 @@ import re
 import codecs
 import os
 import sys
+from analizadorSemantico import *
 from pip._vendor.distlib.compat import raw_input
 
 
@@ -54,7 +55,7 @@ t_FOR = r'For'
 t_STEP = r'Step'
 t_IF = r'If'
 t_ELSE = r'Else'
-t_TYPE = r'type'
+t_TYPE = r'Type'
 t_PRINCIPAL = r'Principal\(\)'
 t_ABANICO = r'Abanico\((A|B)\)'
 t_VERTICAL = r'Vertical\((D|I)\)'
@@ -141,7 +142,9 @@ def t_NUMBER(t):
     return t
 
 def t_error(t):
-    print("caracter ilegal '%s'" % t.value[0])
+    global errorList
+
+    errorList.append(["Caracter ilegal: " + str(t.value[0]), t.lexer.lineno])
     t.lexer.skip(1)
 
 

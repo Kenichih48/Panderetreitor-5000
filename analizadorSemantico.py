@@ -3,7 +3,7 @@ variables = {}
 variablesTemp = []
 varsTemp = {}
 moves = []
-metronomoOn = True
+metronomoOn = False
 printParameters = ''
 printList = []
 errorList = []
@@ -236,21 +236,21 @@ def Abanico(movimiento):
     movimiento = movimiento[len(movimiento)-2]
     if metronomoOn:
         moves.append(movimiento)
+        return 'move' + movimiento
     else:
         print('Metronomo is not activated')
+        return ''
 
-    #print(moves)
-
-    return 'move' + movimiento
+    
 
 def Vertical(movimiento):
     movimiento = movimiento[len(movimiento)-2]
     if metronomoOn:
         moves.append(movimiento)
+        return 'move' + movimiento
     else:
         print('Metronomo is not activated')
-
-    return 'move' + movimiento
+        return ''
 
 def Percutor(movimiento):
     if len(movimiento) != 11:
@@ -258,6 +258,8 @@ def Percutor(movimiento):
     else:
         movimiento = movimiento[len(movimiento)-2]
 
+    movimiento = movimiento.replace('DI', 'X')
+    movimiento = movimiento.replace('AB', 'Y')
     movimiento = movimiento.replace('D', 'R')
     movimiento = movimiento.replace('I', 'L')
     movimiento = movimiento.replace('A', 'O')
@@ -265,21 +267,19 @@ def Percutor(movimiento):
 
     if metronomoOn:
         moves.append(movimiento)
+        return 'move' + movimiento
     else:
         print('Metronomo is not activated')
-
-    return 'move' + movimiento
+        return ''
 
 def Golpe(movimiento):
     movimiento = 'G'
     if metronomoOn:
         moves.append(movimiento)
+        return 'move' + movimiento
     else:
         print('Metronomo is not activated')
-
-    #print(moves)
-
-    return 'move' + movimiento
+        return ''
 
 def Vibrato(movimiento):
     value = ''
@@ -290,10 +290,10 @@ def Vibrato(movimiento):
     if metronomoOn:
         todo = todo * movimiento
         moves.append(todo)
+        return 'move' + todo
     else:
         print('Metronomo is not activated')
-
-    return 'move' + todo
+        return ''
 
 def isNum(num):
     try:
@@ -346,6 +346,18 @@ def addPrintPar2(variable):
     else:
         printParameters += str(variable)
 
+    return str(variable)
+
+def addPrintPar3(variable, line):
+    global printParameters
+
+    for key, value in variables.items():
+        if key == variable:
+            printParameters += value[1]
+            break
+    else:
+        errorList.append(["Error semantico, la variable %s no existe" % variable, line])
+    
     return str(variable)
 
 def conditionVerifier(condition):
@@ -445,9 +457,12 @@ def ifVerifier(condition, block, block2, line):
 
             elif i.startswith('move'):
                 i = i.replace('move', '')
-                moves.reverse()
-                moves.remove(i)
-                moves.reverse()
+                try:
+                    moves.reverse()
+                    moves.remove(i)
+                    moves.reverse()
+                except:
+                    pass
 
                 #print(moves)
 
@@ -521,9 +536,12 @@ def ifVerifier(condition, block, block2, line):
                             elif j.startswith('move'):
                                 jTemp = j.replace('move', '')
                                 #print(j)
-                                moves.reverse()
-                                moves.remove(jTemp)
-                                moves.reverse()
+                                try:
+                                    moves.reverse()
+                                    moves.remove(jTemp)
+                                    moves.reverse()
+                                except:
+                                    pass
 
 
         blockTemp = ''
@@ -580,9 +598,12 @@ def ifVerifier(condition, block, block2, line):
 
             elif i.startswith('move'):
                 i = i.replace('move', '')
-                moves.reverse()
-                moves.remove(i)
-                moves.reverse()
+                try:
+                    moves.reverse()
+                    moves.remove(i)
+                    moves.reverse()
+                except:
+                    pass
 
                 #print(moves)
 
@@ -656,9 +677,12 @@ def ifVerifier(condition, block, block2, line):
                             elif j.startswith('move'):
                                 jTemp = j.replace('move', '')
                                 #print(j)
-                                moves.reverse()
-                                moves.remove(jTemp)
-                                moves.reverse()
+                                try:
+                                    moves.reverse()
+                                    moves.remove(jTemp)
+                                    moves.reverse()
+                                except:
+                                    pass
 
         blockTemp = ''
         for x in block:
@@ -736,9 +760,12 @@ def ifVerifier2(condition, block, line):
 
             elif i.startswith('move'):
                 i = i.replace('move', '')
-                moves.reverse()
-                moves.remove(i)
-                moves.reverse()
+                try:
+                    moves.reverse()
+                    moves.remove(i)
+                    moves.reverse()
+                except:
+                    pass
 
                 #print(moves)
 
@@ -812,9 +839,12 @@ def ifVerifier2(condition, block, line):
                             elif j.startswith('move'):
                                 jTemp = j.replace('move', '')
                                 #print(j)
-                                moves.reverse()
-                                moves.remove(jTemp)
-                                moves.reverse()
+                                try:
+                                    moves.reverse()
+                                    moves.remove(jTemp)
+                                    moves.reverse()
+                                except:
+                                    pass
 
         return str(conditionVerifier(condition))
 
@@ -971,9 +1001,12 @@ def forVerifier(id, factor, num, block, line):
 
         elif i.startswith('move'):
             i = i.replace('move', '')
-            moves.reverse()
-            moves.remove(i)
-            moves.reverse()
+            try:
+                moves.reverse()
+                moves.remove(i)
+                moves.reverse()
+            except:
+                pass
 
             if int(idTemp) <= int(factorTemp) + 1:
                 for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
@@ -1115,9 +1148,12 @@ def forVerifier(id, factor, num, block, line):
                         elif j.startswith('move'):
                             jTemp = j.replace('move', '')
                             #print(j)
-                            moves.reverse()
-                            moves.remove(jTemp)
-                            moves.reverse()
+                            try:
+                                moves.reverse()
+                                moves.remove(jTemp)
+                                moves.reverse()
+                            except:
+                                pass
 
                             if int(idTemp) <= int(factorTemp) + 1:
                                 for x in range(int(idTemp), int(factorTemp) + 1, int(num)):
@@ -1209,9 +1245,12 @@ def enCasoVerifier(boolString, block, line):
 
             elif i.startswith('move'):
                 i = i.replace('move', '')
-                moves.reverse()
-                moves.remove(i)
-                moves.reverse()
+                try:
+                    moves.reverse()
+                    moves.remove(i)
+                    moves.reverse()
+                except:
+                    pass
 
             elif i.startswith('exec'):
                 i = i.replace('exec', '')
@@ -1283,9 +1322,12 @@ def enCasoVerifier(boolString, block, line):
                             elif j.startswith('move'):
                                 jTemp = j.replace('move', '')
                                 #print(j)
-                                moves.reverse()
-                                moves.remove(jTemp)
-                                moves.reverse()
+                                try:
+                                    moves.reverse()
+                                    moves.remove(jTemp)
+                                    moves.reverse()
+                                except:
+                                    pass
         try: 
             for i in range(len(boolString)):
                 boolString.remove("True")
@@ -1389,9 +1431,12 @@ def enCasoVerifier2(boolString, block, line):
 
             elif i.startswith('move'):
                 i = i.replace('move', '')
-                moves.reverse()
-                moves.remove(i)
-                moves.reverse()
+                try:
+                    moves.reverse()
+                    moves.remove(i)
+                    moves.reverse()
+                except:
+                    pass
 
             elif i.startswith('exec'):
                 i = i.replace('exec', '')
@@ -1463,9 +1508,12 @@ def enCasoVerifier2(boolString, block, line):
                             elif j.startswith('move'):
                                 jTemp = j.replace('move', '')
                                 #print(j)
-                                moves.reverse()
-                                moves.remove(jTemp)
-                                moves.reverse()
+                                try:
+                                    moves.reverse()
+                                    moves.remove(jTemp)
+                                    moves.reverse()
+                                except:
+                                    pass
 
                 #print(moves)
 
@@ -1529,12 +1577,12 @@ def enCasoVerifier2(boolString, block, line):
 
                 elif item.startswith('move'):
                     item = item.replace('move', '')
-                    moves.reverse()
-                    #print(moves)
-                    moves.remove(item)
-                    #print('after removed: ' + str(moves))
-                    moves.reverse()
-                    #print('after reverse: ' + str(moves))
+                    try:
+                        moves.reverse()
+                        moves.remove(item)
+                        moves.reverse()
+                    except:
+                        pass
 
                     #print(moves)
                     cuandoEntonsList[index] = ''
@@ -1609,9 +1657,12 @@ def enCasoVerifier2(boolString, block, line):
                                 elif j.startswith('move'):
                                     jTemp = j.replace('move', '')
                                     #print(j)
-                                    moves.reverse()
-                                    moves.remove(jTemp)
-                                    moves.reverse()
+                                    try:
+                                        moves.reverse()
+                                        moves.remove(jTemp)
+                                        moves.reverse()
+                                    except:
+                                        pass
 
 
                     cuandoEntonsList[index] = ''
@@ -1752,9 +1803,12 @@ def defRutinas(id, parameters, block, line):
             elif i.startswith('move'):
                 rutinasListTemp.append(i)
                 i = i.replace('move', '')
-                moves.reverse()
-                moves.remove(i)
-                moves.reverse()
+                try:
+                    moves.reverse()
+                    moves.remove(i)
+                    moves.reverse()
+                except:
+                    pass
 
                 #print(moves)
 
@@ -1831,9 +1885,12 @@ def defRutinas(id, parameters, block, line):
                             elif j.startswith('move'):
                                 jTemp = j.replace('move', '')
                                 #print(j)
-                                moves.reverse()
-                                moves.remove(jTemp)
-                                moves.reverse()
+                                try:
+                                    moves.reverse()
+                                    moves.remove(jTemp)
+                                    moves.reverse()
+                                except:
+                                    pass
 
         defRutinasDict[id] = [parametersTemp, rutinasListTemp]
         #print('defRutinasDict: ' + str(defRutinasDict))
@@ -1905,9 +1962,12 @@ def defPrincipal(block, line):
 
             elif i.startswith('move'):
                 i = i.replace('move', '')
-                moves.reverse()
-                moves.remove(i)
-                moves.reverse()
+                try:
+                    moves.reverse()
+                    moves.remove(i)
+                    moves.reverse()
+                except:
+                    pass
 
                 #print(moves)
 
@@ -1981,9 +2041,12 @@ def defPrincipal(block, line):
                             elif j.startswith('move'):
                                 jTemp = j.replace('move', '')
                                 #print(j)
-                                moves.reverse()
-                                moves.remove(jTemp)
-                                moves.reverse()
+                                try:
+                                    moves.reverse()
+                                    moves.remove(jTemp)
+                                    moves.reverse()
+                                except:
+                                    pass
 
 
 def execRutinas(id, parameters, line):

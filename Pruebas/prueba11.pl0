@@ -1,11 +1,12 @@
-SET @asdf, 10;
-println!(@asdf);
-
 Def @MiRutina() {
     SET @asdf, 5;
-    println!(@asdf);
+    println!(Type(@asdf));
 };
 
-println!(@asdf);
-
-Exec @MiRutina();
+Def Principal() {
+    SET @asdf1, True;
+    For @var to 2 {
+        println!(Type(@asdf1));
+    };
+    Exec @MiRutina();
+};

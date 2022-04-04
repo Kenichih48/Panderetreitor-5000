@@ -1,10 +1,16 @@
 Def @MiRutina() {
-	SET @var1, 5;
-	SET @var1, False;
-	SET @var2, True;
-	SET @var2, 10;
+    #SET @asdf, False;
+    #println!(Type(@asdf));
+    Percutor(AB);
+    Percutor(DI);
+    Metronomo(A, 1/2);
+    Golpe();
+    Vibrato(16);
 };
 
 Def Principal() {
-	Exec @MiRutina();
+    For @var to 2 {
+        println!(@var);
+    };
+    Exec @MiRutina();
 };

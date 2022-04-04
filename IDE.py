@@ -3,6 +3,8 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 import threading
 import time
 from analizadorSintactico import *
+from analizadorLexico import *
+from ArduinoHandler import *
 
 #root window
 root = Tk()
@@ -15,11 +17,17 @@ root.title("Tambarduine IDE")
 main_path = ''
 errors_names = []
 
+arduino = ArduinoHandler()
+
 '''
 Definicion de funcion: Accion del boton de compilar y correr
 '''
 def comp_run():
     global errors_names, metronomoOn, printParameters, contador
+
+    text_output.configure(state='normal')
+    text_output.delete('1.0', END)
+    text_output.configure(state='disabled')
     
     for i in errors_names:
         print("erasing error: "+i)
@@ -36,17 +44,12 @@ def comp_run():
     error_list = []
     errorList.reverse()
 
-    print('ErrorList: ' + str(errorList))
+    #print('ErrorList: ' + str(errorList))
 
     for i in errorList:
         error_list.append(i[1])
 
     if not errorFoundLine(error_list):
-        
-        #text_output.configure(state='normal')
-        #text_output.delete('1.0', END)
-        #text_output.insert('1.0',"Hey! You ran and compiled the code :)")
-        #text_output.configure(state='disabled')
 
         printList.reverse()
 
@@ -55,6 +58,63 @@ def comp_run():
             text_output.insert('1.0', i)
             text_output.insert('1.0', "\n")
             text_output.configure(state='disabled')
+
+        for j in moves:
+            if j.startswith("M") or j.startswith("P"):
+                arduino.add_metronome(j)
+            else:
+                arduino.add_pila(j)
+    else:
+        for i in errorList:
+            text_output.configure(state='normal')
+            text_output.insert('1.0', i[0])
+            text_output.insert('1.0', "\n")
+            text_output.configure(state='disabled')
+
+    variables.clear()
+    variablesTemp.clear()
+    varsTemp.clear()
+    moves.clear()
+    metronomoOn = False
+    printParameters = ''
+    printList.clear()
+    errorList.clear()
+    cuandoEntonsList.clear()
+    defRutinasDict.clear()
+    contador = 0
+    parser = yacc()
+    lexer = lex()
+
+'''
+Definicion de funcion: Accion del boton de compilar unicamente
+''' 
+def comp():
+    global errors_names, metronomoOn, printParameters, contador
+
+    text_output.configure(state='normal')
+    text_output.delete('1.0', END)
+    text_output.configure(state='disabled')
+
+    for i in errors_names:
+        text_lineNum.tag_delete(i)
+
+    with open('temp.pl0', 'w') as file:
+            code = text_info.get('1.0', END)
+            file.write(code)
+        
+    run()
+
+    error_list = []
+    errorList.reverse()
+
+    for i in errorList:
+        error_list.append(i[1])
+    print("ErrorList: " + str(errorList))
+
+    if not errorFoundLine(error_list):
+        text_output.configure(state='normal')
+        text_output.insert('1.0',"Compilador sin errores!")
+        text_output.configure(state='disabled')
 
     else:
         for i in errorList:
@@ -74,33 +134,8 @@ def comp_run():
     cuandoEntonsList.clear()
     defRutinasDict.clear()
     contador = 0
-
-'''
-Definicion de funcion: Accion del boton de compilar unicamente
-''' 
-def comp():
-    global errors_names
-    #global main_path
-    #if main_path == '':
-    #    save_warning = Toplevel()
-    #    notice = Label(save_warning, text="Please save the file first")
-    #    notice.pack()
-    #    return
-
-    for i in errors_names:
-        text_lineNum.tag_delete(i)
-
-    #error_list = [1,7,12, 25 ,45]
-    if not errorFoundLine(error_list):
-        text_output.configure(state='normal')
-        text_output.delete('1.0', END)
-        text_output.insert('1.0',"Woah buddy, you've just compiled your code!")
-        text_output.configure(state='disabled')
-    else:
-        text_output.configure(state='normal')
-        text_output.delete('1.0', END)
-        text_output.insert('1.0',"Errors found")
-        text_output.configure(state='disabled')
+    parser = yacc()
+    lexer = lex()
 
 '''
 Definicion de funcion: Accion del boton de abrir archivo que redirecciona al buscador
