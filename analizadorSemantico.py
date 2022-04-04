@@ -1,5 +1,4 @@
 import re
-from analizadorSintactico import *
 variables = {}
 variablesTemp = []
 varsTemp = {}
@@ -7,10 +6,12 @@ moves = []
 metronomoOn = True
 printParameters = ''
 printList = []
+errorList = []
 cuandoEntonsList = []
 defRutinasDict = {}
 contador = 0
 
+#Function to return variables
 def returnVariables():
     #print(bool(variables))
     for key, value in variables.items():
@@ -20,16 +21,18 @@ def returnVariables():
                 break
     if variablesTemp:
         for idx, i in enumerate(variablesTemp):
-            print("Error semantico, la variable %s nunca fue definida" % variablesTemp[idx][0])
+            errorList.append("Error semantico, la variable %s nunca fue definida" % variablesTemp[idx][0])
 
     #if variablesTemp:
     #    for i in range(len(variablesTemp)):
     #        print("Error semantico, la variable %s nunca fue definida" % variablesTemp[i][0])
     return variables
 
+#Function to return moves
 def returnMoves():
     return moves
 
+#Function to return printList
 def returnPrintList():
     printListTemp = []
 
@@ -142,7 +145,9 @@ def varDeclaration(id, val, line):
                 variables[id] = [val, typeV]
                 break
             elif key == id and value[1] != typeV:
-                print("Error semantico, la variable %s ya existe y se le quiere cambiar el tipo" % id)
+                errorList.append(["Error semantico, la variable %s ya existe y se le quiere cambiar el tipo" % id, line])
+                #print("Error semantico, la variable %s ya existe y se le quiere cambiar el tipo %d" % (id,line))
+                #print("Line: " + str(line))
                 break 
         else:
             variables[id] = [val, typeV]
@@ -162,9 +167,9 @@ def arithOperation(operation, line):
             if key == var and value[1] == 'num':
                 newOper = newOper.replace(var, value[0])
             elif ((newOper.find('True')) != -1) or ((newOper.find('False')) != -1):
-                print("Error semantico, no se pueden hacer operaciones aritmeticas con booleanos")
+                errorList.append(["Error semantico, no se pueden hacer operaciones aritmeticas con booleanos", line])
             elif key == var and value[1] == 'bool':
-                print("Error semantico, no se pueden hacer operaciones aritmeticas con booleanos 2")
+                errorList.append(["Error semantico, no se pueden hacer operaciones aritmeticas con booleanos 2", line])
             elif key == var:
                 pass
 
@@ -188,11 +193,11 @@ def boolOperation(id, operation, line):
         elif key == id and value[1] == 'bool' and operation == '.F':
             value[0] = 'False'
         elif key == id and value[1] == 'num':
-            print("Error semantico, no se pueden hacer operaciones booleanas con numeros")
+            errorList.append(["Error semantico, no se pueden hacer operaciones booleanas con numeros", line])
     #print(variables)
 
     if tempValue == '':
-        print("Error semantico, no se pueden hacer operaciones booleanas con variables no existentes")
+        errorList.append(["Error semantico, no se pueden hacer operaciones booleanas con variables no existentes", line])
         return "Error"
     else:
         return 'bool' + id + operation + '&' + tempValue
@@ -358,7 +363,7 @@ def conditionVerifier(condition):
 
     for element in condition:
         if element == '@':
-            print("Error semantico, la variable %s no ha sido definida" % element)
+            errorList.append("Error semantico, la variable %s no ha sido definida" % element)
     else:
         return eval(condition)    
 
@@ -836,7 +841,7 @@ def forVerifier(id, factor, num, block, line):
         if key == idTemp and value[1] == 'num':
             idTemp = value[0]
         elif key == idTemp and value[1] == 'bool':
-            print("Error semantico, no se pueden usar booleanos en ciclos For 1")
+            errorList.append(["Error semantico, no se pueden usar booleanos en ciclos For 1", line])
             return 'Error'
         elif key != idTemp:
             pass
@@ -845,7 +850,7 @@ def forVerifier(id, factor, num, block, line):
         if key == factorTemp and value[1] == 'num':
             factorTemp = value[0]
         elif key == factorTemp and value[1] == 'bool':
-            print("Error semantico, no se pueden usar booleanos en ciclos For 2")
+            errorList.append(["Error semantico, no se pueden usar booleanos en ciclos For 2", line])
             return 'Error'
         elif key != factorTemp:
             pass
@@ -853,7 +858,7 @@ def forVerifier(id, factor, num, block, line):
     if idTemp.find('@') != -1:
         idTemp = 1
     if factorTemp.find('@') != -1:
-        print("Error semantico, no se pueden usar booleanos en ciclos For o variable maxima no definida")
+        errorList.append(["Error semantico, no se pueden usar booleanos en ciclos For o variable maxima no definida", line])
         return 'Error'
 
     block = block.replace(";", ",")
@@ -1835,7 +1840,7 @@ def defRutinas(id, parameters, block, line):
         #print('id: ' + str(id) + ', parameters: ' + str(parametersTemp) + ', block: ' + str(block))
 
     else:
-        print("Error semantico, el nombre %s de la rutina utilizada ya existe" % id)
+        errorList.append(["Error semantico, el nombre %s de la rutina utilizada ya existe" % id, line])
 
 def defPrincipal(block, line):
     global contador
@@ -1845,7 +1850,7 @@ def defPrincipal(block, line):
         pass
     elif contador != 0:
 
-        print("Error semantico, no se puede tener dos rutinas principales definidas")
+        errorList.append(["Error semantico, no se puede tener dos rutinas principales definidas", line])
         block = block.replace(";", ",")
         block = block.split(",")
         for i in block:
@@ -2065,13 +2070,13 @@ def execRutinas(id, parameters, line):
                 #                    moves.append(iTemp)
 
         elif key == id and len(parametersTemp) > len(value[0]):
-            print("Error semantico, la rutina %s necesita menos parametros de los brindados" % id)
+            errorList.append(["Error semantico, la rutina %s necesita menos parametros de los brindados" % id, line])
         elif key == id and len(parametersTemp) < len(value[0]):
-            print("Error semantico, la rutina necesita mas parametros de los brindados" % id)
+            errorList.append(["Error semantico, la rutina necesita mas parametros de los brindados" % id, line])
         elif key != id:
             pass     
         else:
-            print("Error semantico, la rutina %s no existe" % id)
+            errorList.append(["Error semantico, la rutina %s no existe" % id, line])
 
     for key, value in varsTemp.items():
         varDeclaration(key, value[0], line)
