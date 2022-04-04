@@ -19,16 +19,28 @@ errors_names = []
 Definicion de funcion: Accion del boton de compilar y correr
 '''
 def comp_run():
-    global errors_names
-    
-    
+    global errors_names, metronomoOn, printParameters, contador
     
     for i in errors_names:
         print("erasing error: "+i)
         text_lineNum.tag_delete(i)
     
     #errorFound([1,10,25])
-    #error_list = []
+
+    with open('temp.pl0', 'w') as file:
+            code = text_info.get('1.0', END)
+            file.write(code)
+        
+    run()
+
+    error_list = []
+    errorList.reverse()
+
+    print('ErrorList: ' + str(errorList))
+
+    for i in errorList:
+        error_list.append(i[1])
+
     if not errorFoundLine(error_list):
         
         #text_output.configure(state='normal')
@@ -36,33 +48,32 @@ def comp_run():
         #text_output.insert('1.0',"Hey! You ran and compiled the code :)")
         #text_output.configure(state='disabled')
 
-        with open('temp.pl0', 'w') as file:
-            code = text_info.get('1.0', END)
-            file.write(code)
-        
-        run()
+        printList.reverse()
 
-        if len(errorList) > 0:
-            errorList.reverse()
-            for i in errorList:
-                text_output.configure(state='normal')
-                text_output.insert('1.0', i[0])
-                text_output.insert('1.0', "\n")
-                text_output.configure(state='disabled')
-        else:
-            printList.reverse()
-
-            for i in printList:
-                text_output.configure(state='normal')
-                text_output.insert('1.0', i)
-                text_output.insert('1.0', "\n")
-                text_output.configure(state='disabled')
+        for i in printList:
+            text_output.configure(state='normal')
+            text_output.insert('1.0', i)
+            text_output.insert('1.0', "\n")
+            text_output.configure(state='disabled')
 
     else:
-        text_output.configure(state='normal')
-        text_output.delete('1.0', END)
-        text_output.insert('1.0',"Errors found")
-        text_output.configure(state='disabled')
+        for i in errorList:
+            text_output.configure(state='normal')
+            text_output.insert('1.0', i[0])
+            text_output.insert('1.0', "\n")
+            text_output.configure(state='disabled')
+
+    variables.clear()
+    variablesTemp.clear()
+    varsTemp.clear()
+    moves.clear()
+    metronomoOn = False
+    printParameters = ''
+    printList.clear()
+    errorList.clear()
+    cuandoEntonsList.clear()
+    defRutinasDict.clear()
+    contador = 0
 
 '''
 Definicion de funcion: Accion del boton de compilar unicamente
@@ -298,13 +309,15 @@ def errorFoundLine(lineErrors):
     errors_names =[]
     found = False
     temp = text_lineNum.get('1.0', 'end-1c')
+    inThisLine = True
     for j in range(len(current_program)):
         
         if current_program[j] == "\n":
-                line_counter += 1
+            inThisLine = True
+            line_counter += 1
                 
-        if line_counter in lineErrors:
-            
+        if line_counter in lineErrors and inThisLine:
+            inThisLine = False
             text_lineNum.tag_add("E"+str(line_counter), str(line_counter)+".0", str(line_counter)+".5")
             text_lineNum.tag_config("E"+str(line_counter), background= "red", foreground= "white")
             errors_names += ["E"+str(line_counter)]

@@ -438,7 +438,7 @@ def p_empty(p):
 
 #Error checker
 def p_error(p):
-	errorList.append("Error de sintaxis " + str(p.type), p.lineno(1))    
+	errorList.append(["Error de sintaxis " + str(p.type()), p.lineno(1)])    
 
 def buscarFicheros(directorio):
 	ficheros = []

@@ -147,7 +147,7 @@ def varDeclaration(id, val, line):
             elif key == id and value[1] != typeV:
                 errorList.append(["Error semantico, la variable %s ya existe y se le quiere cambiar el tipo" % id, line])
                 #print("Error semantico, la variable %s ya existe y se le quiere cambiar el tipo %d" % (id,line))
-                #print("Line: " + str(line))
+                #print("Error semantico, la variable " + str(id) + " ya existe y se le quiere cambiar el tipo, Line: " + str(line))
                 break 
         else:
             variables[id] = [val, typeV]
