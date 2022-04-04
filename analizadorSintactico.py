@@ -58,15 +58,15 @@ def p_varDeclEmpty(p):
 
 def p_varDeclSt1(p):
     '''varDeclSt : SET ID COMMA factor'''
-    p[0] = varDeclaration(p[2], p[4])#.returnVariable()
+    p[0] = varDeclaration(p[2], p[4], p.lineno)#.returnVariable()
 
 def p_varDeclSt2(p):
     '''varDeclSt : SET ID COMMA arithOperationList'''
-    p[0] = varDeclaration(p[2], arithOperation(p[4]))#.returnVariable
+    p[0] = varDeclaration(p[2], arithOperation(p[4], p.lineno), p.lineno)#.returnVariable
 
 def p_varDeclSt3(p):
     '''varDeclSt : SET ID boolOperation'''
-    p[0] = boolOperation(p[2], p[3])
+    p[0] = boolOperation(p[2], p[3], p.lineno)
 
 def p_varDeclList1(p):
     '''varDeclList : varDeclSt'''
@@ -190,7 +190,7 @@ def p_procDeclSt1(p):
 
 def p_procDeclSt4(p):
     '''procDeclSt : EXEC ID LPARENTHESES parameter RPARENTHESES'''
-    p[0] = execRutinas(p[2], p[4])
+    p[0] = execRutinas(p[2], p[4], p.lineno)
 
 def p_funcDecl1(p):
     '''funcDecl : funcDeclList SEMICOLON'''
@@ -210,11 +210,11 @@ def p_funcDeclList2(p):
 
 def p_funcDeclSt1(p):
     '''funcDeclSt : DEF ID LPARENTHESES parameter RPARENTHESES LBRACKET blockList RBRACKET'''
-    p[0] = defRutinas(p[2], p[4], p[7])
+    p[0] = defRutinas(p[2], p[4], p[7], p.lineno)
  
 def p_funcDeclSt2(p):
     '''funcDeclSt : DEF PRINCIPAL LBRACKET blockList RBRACKET'''
-    p[0] = defPrincipal(p[4])
+    p[0] = defPrincipal(p[4], p.lineno)
 
 def p_parameter1(p):
     '''parameter : parameterList'''
@@ -249,24 +249,24 @@ def p_statementList2(p):
 
 def p_statement1(p):
     '''statement : IF condition LBRACKET blockList RBRACKET'''
-    p[0] = ifVerifier(p[2], p[4], '')
+    p[0] = ifVerifier(p[2], p[4], '', p.lineno)
 
 def p_statement2(p):
     '''statement : IF condition LBRACKET blockList RBRACKET ELSE LBRACKET blockList RBRACKET'''
-    p[0] = ifVerifier(p[2], p[4], p[8])
+    p[0] = ifVerifier(p[2], p[4], p[8], p.lineno)
 
 def p_statement3(p):
     '''statement : FOR ID TO factor STEP NUMBER LBRACKET blockList RBRACKET'''
-    p[0] = forVerifier(p[2], p[4], p[6], p[8])
+    p[0] = forVerifier(p[2], p[4], p[6], p[8], p.lineno)
 
 def p_statement4(p):
     '''statement : FOR ID TO factor LBRACKET blockList RBRACKET'''
-    p[0] = forVerifier(p[2], p[4], '1', p[6])
+    p[0] = forVerifier(p[2], p[4], '1', p[6], p.lineno)
 
 def p_statement5(p):
     '''statement : ENCASO cuandoEntonsList SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
     #print('encaso 1')
-    p[0] = enCasoVerifier(p[2], p[6])
+    p[0] = enCasoVerifier(p[2], p[6], p.lineno)
 
 def p_statement6(p):
     '''statement : ENCASO ID cuandoEntonsListAux SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
@@ -277,9 +277,9 @@ def p_statement6(p):
         i = i.split(',')
         for j in i[1:len(i)]:
             string += j + ','
-        p[3] += ifVerifier2(i[0], string) + ";"
+        p[3] += ifVerifier2(i[0], string, p.lineno) + ";"
 
-    p[0] = enCasoVerifier2(p[3], p[7])
+    p[0] = enCasoVerifier2(p[3], p[7], p.lineno)
 
 def p_cuandoEntonsList1(p):
     '''cuandoEntonsList : cuandoEntons'''
@@ -292,7 +292,7 @@ def p_cuandoEntonsList2(p):
 def p_cuandoEntons1(p):
     '''cuandoEntons : CUANDO ID relation factor ENTONS LBRACKET blockList RBRACKET'''
     #print('encaso 3')
-    p[0] = ifVerifier((p[2] + p[3] + p[4]), p[7], '')
+    p[0] = ifVerifier((p[2] + p[3] + p[4]), p[7], '', p.lineno)
 
 def p_cuandoEntonsAux1(p):
     '''cuandoEntonsAux : CUANDO relation factor ENTONS LBRACKET blockList RBRACKET'''
@@ -417,7 +417,7 @@ def p_empty(p):
 	pass
 
 def p_error(p):
-	print ("Error de sintaxis ", p)    
+	print ("Error de sintaxis ", p.lineno)    
 
 def buscarFicheros(directorio):
 	ficheros = []
