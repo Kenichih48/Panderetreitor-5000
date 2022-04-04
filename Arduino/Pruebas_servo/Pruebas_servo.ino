@@ -39,13 +39,13 @@ void setup() {
   Serial.begin(9600);
  
 
-  servoEje2.attach(11);
+  servoEje2.attach(6);
   servoEje1.attach(3);
   servoGolpe1.attach(4);
   servoGolpe2.attach(5);
   servoGolpe3.attach(7);
   servoGolpe4.attach(8);
-  servoGolpe5.attach(6);
+  servoGolpe5.attach(11);
   
   EasyBuzzer.setPin(9);
   
@@ -176,15 +176,21 @@ void performMovement(){
   }else if (movement[lastMove] == 'I'){
     servoEje2.write(135);
   }else if (movement[lastMove] == 'G'){
-    servoGolpe3.write(45);
+    servoGolpe3.write(145);
   }else if (movement[lastMove] == 'R'){
-    servoGolpe1.write(90);
+    servoGolpe1.write(60);
   }else if (movement[lastMove] == 'L'){
-    servoGolpe2.write(90);
+    servoGolpe2.write(120);
   }else if (movement[lastMove] == 'U'){
-    servoGolpe4.write(90);
+    servoGolpe4.write(120);
   }else if (movement[lastMove] == 'O'){
-    servoGolpe5.write(90);
+    servoGolpe5.write(120);
+  }else if (movement[lastMove] == 'X'){
+    servoGolpe1.write(45);
+    servoGolpe2.write(120);
+  }else if (movement[lastMove] == 'Y'){
+    servoGolpe4.write(120);
+    servoGolpe5.write(120);
   }
   
 }
@@ -198,14 +204,20 @@ void returnMoves(){
   }else if (movement[lastMove-1] == 'D' || movement[lastMove-1] == 'I'){
     servoEje2.write(90);
   }else if (movement[lastMove-1] == 'G'){
-    servoGolpe3.write(0);
+    servoGolpe3.write(90);
   }else if (movement[lastMove-1] == 'R'){
-    servoGolpe1.write(0);
+    servoGolpe1.write(90);
   }else if (movement[lastMove-1] == 'U'){
-    servoGolpe4.write(0);
+    servoGolpe4.write(90);
   }else if (movement[lastMove-1] == 'L'){
-    servoGolpe2.write(0);
+    servoGolpe2.write(90);
   }else if (movement[lastMove-1] == 'O'){
-    servoGolpe5.write(0);
+    servoGolpe5.write(90);
+  }else if (movement[lastMove-1] == 'X'){
+    servoGolpe1.write(90);
+    servoGolpe2.write(90);
+  } else if (movement[lastMove-1] == 'Y'){
+    servoGolpe4.write(90);
+    servoGolpe5.write(90);
   }
 }
