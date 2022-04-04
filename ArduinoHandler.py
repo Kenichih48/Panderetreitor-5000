@@ -48,6 +48,7 @@ class ArduinoHandler:
     def reset(self):
         self.metronome = []
         self.pila = []
+        self.i =-1
 
 
 

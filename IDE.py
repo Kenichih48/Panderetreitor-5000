@@ -25,6 +25,21 @@ Definicion de funcion: Accion del boton de compilar y correr
 def comp_run():
     global errors_names, metronomoOn, printParameters, contador
 
+    variables.clear()
+    variablesTemp.clear()
+    varsTemp.clear()
+    moves.clear()
+    metronomoOn = False
+    printParameters = ''
+    printList.clear()
+    errorList.clear()
+    cuandoEntonsList.clear()
+    defRutinasDict.clear()
+    reset_contador()
+    parser = yacc()
+    lexer = lex()
+    arduino.reset()
+
     text_output.configure(state='normal')
     text_output.delete('1.0', END)
     text_output.configure(state='disabled')
@@ -59,20 +74,29 @@ def comp_run():
             text_output.insert('1.0', "\n")
             text_output.configure(state='disabled')
 
+        
         for j in moves:
             if j.startswith("M") or j.startswith("P"):
                 arduino.add_metronome(j)
             else:
                 arduino.add_pila(j)
-
+        print(arduino.metronome,arduino.pila)
         arduino.send_data()
-        arduino.reset()
+        
     else:
         for i in errorList:
             text_output.configure(state='normal')
             text_output.insert('1.0', i[0])
             text_output.insert('1.0', "\n")
             text_output.configure(state='disabled')
+
+    
+
+'''
+Definicion de funcion: Accion del boton de compilar unicamente
+''' 
+def comp():
+    global errors_names, metronomoOn, printParameters, contador
 
     variables.clear()
     variablesTemp.clear()
@@ -84,15 +108,9 @@ def comp_run():
     errorList.clear()
     cuandoEntonsList.clear()
     defRutinasDict.clear()
-    contador = 0
+    reset_contador()
     parser = yacc()
     lexer = lex()
-
-'''
-Definicion de funcion: Accion del boton de compilar unicamente
-''' 
-def comp():
-    global errors_names, metronomoOn, printParameters, contador
 
     text_output.configure(state='normal')
     text_output.delete('1.0', END)
@@ -126,19 +144,7 @@ def comp():
             text_output.insert('1.0', "\n")
             text_output.configure(state='disabled')
 
-    variables.clear()
-    variablesTemp.clear()
-    varsTemp.clear()
-    moves.clear()
-    metronomoOn = False
-    printParameters = ''
-    printList.clear()
-    errorList.clear()
-    cuandoEntonsList.clear()
-    defRutinasDict.clear()
-    contador = 0
-    parser = yacc()
-    lexer = lex()
+    
 
 '''
 Definicion de funcion: Accion del boton de abrir archivo que redirecciona al buscador

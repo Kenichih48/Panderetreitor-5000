@@ -11,6 +11,10 @@ cuandoEntonsList = []
 defRutinasDict = {}
 contador = 0
 
+
+def reset_contador():
+    global contador
+    contador = 0
 #Function to return variables
 def returnVariables():
     #print(bool(variables))
