@@ -1,0 +1,5 @@
+SET @x12, 5;
+SET @var, 9;
+SET @var1, 8;
+SET @bnm, @x12 + @var1 * 10 / 4;
+SET @bac, ((@x12 + @var1) * 10) / 4;

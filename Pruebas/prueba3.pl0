@@ -1,8 +1,11 @@
-If @Var1 * 2 == 6 { 
-    Golpe(); 
-    SET @asdf, 2;
+Golpe();
+If 3 * 2 == True { 
+    Golpe();
 };
 
-If @Var2 == 3 {
-    Golpe();
+If 3 > 3 {
+    Abanico(A);
 }
+Else {
+    Abanico(B);
+};

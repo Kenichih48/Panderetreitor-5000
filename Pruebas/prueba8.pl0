@@ -1,0 +1,24 @@
+Def @MiRutina2() {
+    SET @x1, 4;
+    If 3 == 3 {
+        println!("Hello World");
+        println!("Hello World");
+        SET @var1, True;
+        SET @var1.Neg;
+    };
+};
+
+Exec @MiRutina2();
+
+Def @MiRutina (@dato1, @dato2) {
+    SET @x3, @dato1;
+    Golpe();
+    SET @x2, True;
+    For @var2 to 3 Step 1 {
+        SET @x2.Neg;
+        Golpe();
+        println!(@var2);
+    };
+};
+
+Exec @MiRutina (3, 5);

@@ -1,0 +1,11 @@
+SET @asdf, 10;
+println!(@asdf);
+
+Def @MiRutina() {
+    SET @asdf, 5;
+    println!(@asdf);
+};
+
+println!(@asdf);
+
+Exec @MiRutina();

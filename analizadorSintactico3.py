@@ -4,12 +4,17 @@ import codecs
 import os
 from sys import stdin
 from analizadorLexico import tokens
+from analizadorSemantico import *
 from pip._vendor.distlib.compat import raw_input
+
+toVerify = []
 
 precedence = (
    ('right','ID','IF'),
    ('right','DEF', 'EXEC'),
    ('right', 'SET'),
+   ('right', 'LBRACKET', 'RBRACKET'),
+   ('left','PRINTLN'),
    ('left','NEQUAL','EQUAL'),
    ('left','LT','LTE','GT','GTE'),
    ('left','PLUS','MINUS'),
@@ -20,256 +25,372 @@ precedence = (
    )
 
 def p_program(p):
-	'''program : block'''
-	print ("program")
+    '''program : blockList'''
+    print('Variables: ' + str(returnVariables()) + ', Moves: ' + str(returnMoves()) + ', PrintList: ' + str(returnPrintList()))
 
 def p_block(p):
-	'''block : varDecl moveDecl procDecl statement'''
-	print ("block")
+    '''block : varDecl moveDecl procDecl statementDecl''' #funcDecl enCasoDecl'''
+    p[0] = str(p[1]) + ',' + str(p[2]) + ',' + str(p[3]) + ',' + str(p[4])
+
+def p_blockList1(p):
+    '''blockList : block'''
+    p[0] = p[1]
+
+def p_blockList2(p):
+    '''blockList : blockList block'''
+    p[0] = p[1] + p[2]
 
 def p_varDecl1(p):
     '''varDecl : varDeclList SEMICOLON'''
-    print ("varDecl 1")
+    p[0] = p[1]
 
 def p_varDeclEmpty(p):
-	'''varDecl : empty'''
-	print ("nulo")
+    '''varDecl : empty'''
+    p[0] = p[1]
 
 def p_varDeclSt1(p):
-	'''varDeclSt : SET ID COMMA BOOL'''
-	print ("varDeclSt 1")
+    '''varDeclSt : SET ID COMMA factor'''
+    p[0] = varDeclaration(p[2], p[4]).returnVariable()
 
 def p_varDeclSt2(p):
-	'''varDeclSt : SET ID COMMA NUMBER'''
-	print ("varDeclSt 2")
+    '''varDeclSt : SET ID COMMA arithOperationList'''
+    p[0] = varDeclaration(p[2], arithOperation(p[4])).returnVariable
 
 def p_varDeclSt3(p):
-    '''varDeclSt : SET ID COMMA arithOperation'''
-    print ("varDeclSt 3")
-
-def p_varDeclSt4(p):
     '''varDeclSt : SET ID boolOperation'''
-    print ("varDeclSt 4")
+    p[0] = boolOperation(p[2], p[3])
 
 def p_varDeclList1(p):
     '''varDeclList : varDeclSt'''
-    print ("varDeclList 1")
+    p[0] = p[1]
 
 def p_varDeclList2(p):
     '''varDeclList : varDeclList SEMICOLON varDeclSt'''
-    print ("varDeclList 2")
+    p[0] = str(p[1]) + p[2] + str(p[3])
+
+def p_arithOperList1(p):
+    '''arithOperationList : arithOperation'''
+    p[0] = p[1]
+
+def p_arithOperList2(p):
+    '''arithOperationList : arithOperationList addingOperator factor'''
+    p[0] = p[1] + p[2] + p[3]
+
+def p_arithOperList3(p):
+    '''arithOperationList : arithOperationList multiplyingOperator factor'''
+    p[0] = p[1] + p[2] + p[3]
+
+def p_arithOperList4(p):
+    '''arithOperationList : arithOperationList MODULE factor'''
+    p[0] = p[1] + p[2] + p[3]
+
+def p_arithOperList5(p):
+    '''arithOperationList : arithOperationList EXPONENT factor'''
+    p[0] = p[1] + p[2] + p[3]
 
 def p_arithOper1(p):
     '''arithOperation : factor addingOperator factor'''
-    print('arithOper 1')
+    p[0] = p[1] + p[2] + p[3]
 
 def p_arithOper2(p):
-    '''arithOper : factor multiplyingOperator factor'''
-    print('arithOper 2')
+    '''arithOperation : factor multiplyingOperator factor'''
+    p[0] = p[1] + p[2] + p[3]
 
 def p_arithOper3(p):
-    '''arithOper : factor MODULE factor'''
-    print('arithOper 3')
+    '''arithOperation : factor MODULE factor'''
+    p[0] = p[1] + p[2] + p[3]
 
 def p_arithOper4(p):
-    '''arithOper : factor EXPONENT factor'''
-    print('arithOper 4')
+    '''arithOperation : factor EXPONENT factor'''
+    p[0] = p[1] + p[2] + p[3]
 
 def p_arithOper5(p):
-    '''arithOper : MINUS factor'''
-    print('arithOper 5')
+    '''arithOperation : MINUS ID'''
+    p[0] = p[1] + p[2]
 
 def p_boolOper1(p):
     '''boolOperation : NEGATE'''
-    print('boolOper 1')
+    p[0] = p[1]
 
 def p_boolOper2(p):
     '''boolOperation : MTRUE'''
-    print('boolOper 2')
+    p[0] = p[1]
 
 def p_boolOper3(p):
     '''boolOperation : MFALSE'''
-    print('boolOper 3')
+    p[0] = p[1]
 
 def p_moveDecl1(p):
     '''moveDecl : moveDeclList SEMICOLON'''
-    print('moveDecl 1')
+    p[0] = p[1]
 
 def p_moveDeclEmpty(p):
-	'''moveDecl : empty'''
-	print ("nulo")
+    '''moveDecl : empty'''
+    p[0] = p[1]
 
 def p_moveDeclList1(p):
     '''moveDeclList : moveDeclSt'''
-    print('moveDeclList 1')
+    p[0] = p[1]
 
 def p_moveDeclList2(p):
     '''moveDeclList : moveDeclList SEMICOLON moveDeclSt'''
-    print('moveDeclList 2')
-
+    p[0] = p[1] + p[2] + p[3]
+    
 def p_moveDeclSt1(p):
     '''moveDeclSt : ABANICO'''
-    print('moveDeclSt 1')
+    p[0] = Abanico(p[1])
 
 def p_moveDeclSt2(p):
     '''moveDeclSt : VERTICAL'''
-    print('moveDeclSt 2')
+    p[0] = Vertical(p[1])
 
 def p_moveDeclSt3(p):
     '''moveDeclSt : PERCUTOR'''
-    print('moveDeclSt 3')
+    p[0] = Percutor(p[1])
 
 def p_moveDeclSt4(p):
     '''moveDeclSt : GOLPE'''
-    print('moveDeclSt 4')
+    p[0] = Golpe(p[1])
 
 def p_moveDeclSt5(p):
     '''moveDeclSt : VIBRATO'''
-    print('moveDeclSt 5')
+    p[0] = Vibrato(p[1])
 
 def p_moveDeclSt6(p):
     '''moveDeclSt : METRONOMO'''
-    print('moveDeclSt 6')
+    p[0] = Metronomo(p[1])
 
 def p_procDecl1(p):
-	'''procDecl : procDecl PRINTLN LPARENTHESES toPrint RPARENTHESES SEMICOLON'''
-	print ("procDecl 1")
-
-def p_procDecl2(p):
-	'''procDecl : procDecl IF condition LBRACKET block RBRACKET SEMICOLON'''
-	print ("procDecl 2")
+    '''procDecl : procDeclList SEMICOLON''' 
+    p[0] = p[1]
 
 def p_procDeclEmpty(p):
-	'''procDecl : empty'''
-	print ("nulo")
+    '''procDecl : empty'''
+    p[0] = p[1]
+
+def p_procDeclList1(p):
+    '''procDeclList : procDeclSt'''
+    p[0] = p[1]
+
+def p_procDeclList2(p):
+    '''procDeclList : procDeclList SEMICOLON procDeclSt'''
+    p[0] = p[1] + p[2] + p[3]
+
+def p_procDeclSt1(p):
+    '''procDeclSt : PRINTLN LPARENTHESES toPrint RPARENTHESES'''
+    p[0] = toPrint()
+
+def p_procDeclSt2(p):
+    '''procDeclSt : DEF ID LPARENTHESES parameter RPARENTHESES LBRACKET blockList RBRACKET'''
+
+def p_procDeclSt3(p):
+    '''procDeclSt : DEF PRINCIPAL LBRACKET blockList RBRACKET'''
+
+def p_procDeclSt4(p):
+    '''procDeclSt : EXEC ID LPARENTHESES parameter RPARENTHESES'''
+
+def p_parameter1(p):
+    '''parameter : parameterList'''
+
+def p_parameter2(p):
+    '''parameter : empty'''
+
+def p_parameterList1(p):
+    '''parameterList : factor'''
+
+def p_parameterList2(p):
+    '''parameterList : parameterList COMMA factor'''
+
+def p_statementDecl1(p):
+    '''statementDecl : statementList SEMICOLON'''
+    p[0] = p[1]
+def p_statementDeclEmpty(p):
+	'''statementDecl : empty'''
+	p[0] = p[1]
+
+def p_statementList1(p):
+    '''statementList : statement'''
+    p[0] = p[1]
+
+def p_statementList2(p):
+	'''statementList : statementList SEMICOLON statement'''
+	p[0] = str(p[1]) + p[2] + str(p[3])
+
+def p_statement1(p):
+    '''statement : IF condition LBRACKET blockList RBRACKET'''
+    p[0] = ifVerifier(p[2], p[4], '')
+
+def p_statement2(p):
+    '''statement : IF condition LBRACKET blockList RBRACKET ELSE LBRACKET blockList RBRACKET'''
+    p[0] = ifVerifier(p[2], p[4], p[8])
+
+def p_statement3(p):
+    '''statement : FOR ID TO factor STEP NUMBER LBRACKET blockList RBRACKET'''
+    p[0] = forVerifier(p[2], p[4], p[6], p[8])
+
+def p_statement4(p):
+    '''statement : FOR ID TO factor LBRACKET blockList RBRACKET'''
+    p[0] = forVerifier(p[2], p[4], '1', p[6])
+
+def p_statement5(p):
+    '''statement : ENCASO cuandoEntonsList SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
+    print('encaso 1')
+    p[0] = enCasoVerifier(p[2], p[6])
+
+def p_statement6(p):
+    '''statement : ENCASO ID cuandoEntonsListAux SEMICOLON SINO LBRACKET blockList RBRACKET SEMICOLON FINENCASO'''
+    print('encaso 2')
+    for i in toVerify:
+        string = ''
+        i = p[2] + i
+        i = i.split(',')
+        #print(i[1:len(i)])
+        for j in i[1:len(i)]:
+            string += j + ','
+        p[3] += ifVerifier2(i[0], string) + ";"
+
+    #print('p[3]: ' + str(p[3]))
+
+    p[0] = enCasoVerifier2(p[3], p[7])
+
+def p_cuandoEntonsList1(p):
+    '''cuandoEntonsList : cuandoEntons'''
+    p[0] = p[1]
+
+def p_cuandoEntonsList2(p):
+    '''cuandoEntonsList : cuandoEntonsList SEMICOLON cuandoEntons'''
+    p[0] = p[1] + p[2] + p[3]
+
+def p_cuandoEntons1(p):
+    '''cuandoEntons : CUANDO ID relation factor ENTONS LBRACKET blockList RBRACKET'''
+    print('encaso 3')
+    p[0] = ifVerifier((p[2] + p[3] + p[4]), p[7], '')
+
+def p_cuandoEntonsAux1(p):
+    '''cuandoEntonsAux : CUANDO relation factor ENTONS LBRACKET blockList RBRACKET'''
+    print('encaso 4')
+    toVerify.append(p[2] + p[3] + ',' + p[6])
+    #print(toVerify)
+    p[0] = ''
+
+def p_cuandoEntonsListAux1(p):
+    '''cuandoEntonsListAux : cuandoEntonsAux'''
+    p[0] = p[1]
+
+def p_cuandoEntonsListAux2(p):
+    '''cuandoEntonsListAux : cuandoEntonsListAux SEMICOLON cuandoEntonsAux'''
+    p[0] = p[1] + p[2] + p[3]
+
+def p_condition1(p):
+	'''condition : arithOperation relation arithOperation'''
+	p[0] = p[1] + p[2] + p[3]
+
+def p_condition2(p):
+	'''condition : arithOperation relation factor'''
+	p[0] = p[1] + p[2] + p[3]
+
+def p_condition3(p):
+	'''condition : factor relation arithOperation'''
+	p[0] = p[1] + p[2] + p[3]
+
+def p_condition4(p):
+	'''condition : factor relation factor'''
+	p[0] = p[1] + p[2] + p[3]
+
+def p_condition5(p):
+    '''condition : factor'''
+    p[0] = p[1]
 
 def p_toPrint1(p):
     '''toPrint : toPrintList'''
-    print('toPrint 1')
+    p[0] = p[1]
+
+def p_toPrintEmpty(p):
+    '''toPrint : empty'''
+    p[0] = p[1]
 
 def p_toPrintList1(p):
     '''toPrintList : toPrintSt'''
-    print('toPrintList 1')
+    p[0] = p[1]
 
-def p_toPrintList1(p):
+def p_toPrintList2(p):
     '''toPrintList : toPrintList COMMA toPrintSt'''
-    print('toPrintList 2')
+    p[0] = p[1] + p[2] + p[3]
 
 def p_toPrintSt1(p):
     '''toPrintSt : STRING'''
-    print('toPrintSt 1')
+    p[0] = addPrintPar(p[1])
 
 def p_toPrintSt2(p):
     '''toPrintSt : factor'''
-    print('toPrintSt 2')
-
-def p_toPrintSt3(p):
-    '''toPrintSt : arithOperation'''
-    print('toPrintSt 3')
-
-#def p_statement1(p):
-#	'''statement : ID UPDATE expression'''
-#	print ("statement 1")
-
-#def p_statement2(p):
-#	'''statement : CALL ID'''
-#	print ("statement 2")
-
-#def p_statement3(p):
-#	'''statement : BEGIN statementList END'''
-#	print ("statement 3")
-
-def p_statement1(p):
-	'''statement : IF condition LBRACKET block RBRACKET'''
-	print ("statement 4")
-
-#def p_statement5(p):
-#	'''statement : WHILE condition DO statement'''
-#	print ("statement 5")
-
-def p_statementEmpty(p):
-	'''statement : empty'''
-	print ("nulo")
-
-def p_statementList1(p):
-	'''statementList : statement'''
-	print ("statementList 1")
-
-def p_statementList2(p):
-	'''statementList : statementList SEMICOLON statement SEMICOLON'''
-	print ("statementList 2")
-
-#def p_condition1(p):
-#	'''condition : ODD expression'''
-#	print ("condition 1")
-
-def p_condition1(p):
-	'''condition : expression relation expression'''
-	print ("condition 1")
+    p[0] = addPrintPar2(p[1])
 
 def p_relation1(p):
-	'''relation : EQUAL'''
-	print ("relation 1")
+    '''relation : EQUAL'''
+    p[0] = p[1]
 
 def p_relation2(p):
-	'''relation : NEQUAL'''
-	print ("relation 2")
+    '''relation : NEQUAL'''
+    p[0] = p[1]
 
 def p_relation3(p):
-	'''relation : LT'''
-	print ("relation 3")
+    '''relation : LT'''
+    p[0] = p[1]
 
 def p_relation4(p):
-	'''relation : GT'''
-	print ("relation 4")
+    '''relation : GT'''
+    p[0] = p[1]
 
 def p_relation5(p):
-	'''relation : LTE'''
-	print ("relation 5")
+    '''relation : LTE'''
+    p[0] = p[1]
 
 def p_relation6(p):
-	'''relation : GTE'''
-	print ("relation 6")
+    '''relation : GTE'''
+    p[0] = p[1]
 
 def p_addingOperator1(p):
-	'''addingOperator : PLUS'''
-	print ("addingOperator 1")
+    '''addingOperator : PLUS'''
+    p[0] = p[1]
 
 def p_addingOperator2(p):
-	'''addingOperator : MINUS'''
-	print ("addingOperator 1")
+    '''addingOperator : MINUS'''
+    p[0] = p[1]
 
 def p_multiplyingOperator1(p):
-	'''multiplyingOperator : TIMES'''
-	print ("multiplyingOperator 1")
+    '''multiplyingOperator : TIMES'''
+    p[0] = p[1]
 
 def p_multiplyingOperator2(p):
-	'''multiplyingOperator : DIVIDE'''
-	print ("multiplyingOperator 2")
+    '''multiplyingOperator : DIVIDE'''
+    p[0] = p[1]
 
 def p_multiplyingOperator3(p):
     '''multiplyingOperator : WDIVIDE'''
-    print ("multiplyingOperator 3")
+    p[0] = p[1]
 
 def p_factor1(p):
-	'''factor : ID'''
-	print ("factor 1")
+    '''factor : ID'''
+    p[0] = p[1]
 
 def p_factor2(p):
-	'''factor : NUMBER'''
-	print ("factor 2")
+    '''factor : NUMBER'''
+    p[0] = str(p[1])
 
 def p_factor3(p):
-	'''factor : LPARENTHESES arithOperation RPARENTHESES'''
-	print ("factor 3")
+    '''factor : LPARENTHESES arithOperation RPARENTHESES'''
+    p[0] = p[1] + p[2] + p[3]
+
+def p_factor4(p):
+    '''factor : BOOL'''
+    p[0] = p[1]
 
 def p_empty(p):
 	'''empty :'''
 	pass
 
 def p_error(p):
-	print ("Error de sintaxis ", p)
-	#print ("Error en la linea "+str(p.lineno)
+	print ("Error de sintaxis ", p)    
 
 def buscarFicheros(directorio):
 	ficheros = []

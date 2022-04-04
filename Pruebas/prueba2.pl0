@@ -1,5 +1,22 @@
-If @Variable == 5 {Percutor(A);}; 
-If 1 + 2 == 3 {SET @x12.Neg;};
-If @Var1 * 2 == 6 {Golpe();}; 
-If @Var1 == True {println!("Hola Mundo");};
-If True {SET @Variable, 12;};
+SET @Var, 5;
+If @Var == 5 {
+    Percutor(A);
+}; 
+
+If 1 + 2 == 3 {
+    Percutor(B);
+};
+
+SET @Var1, 3;
+If @Var1 * 2 == 6 {
+    Golpe();
+}; 
+
+SET @Var2, True;
+If @Var2 == True {
+    println!("Hola Mundo");
+};
+
+If True {
+    SET @Variable, 12;
+};
