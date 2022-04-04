@@ -7,7 +7,7 @@
 #include <Servo.h>
 #include <EasyBuzzer.h>
  
-// Declaramos la variable para controlar el servo
+// variables de control de los servos
 Servo servoEje1;
 Servo servoEje2;
 Servo servoGolpe1;
@@ -16,22 +16,23 @@ Servo servoGolpe3;
 Servo servoGolpe4;
 Servo servoGolpe5;
 
-
+//Variables de control del metronomo
 bool metroMode;
 int freq1 = 440; 
 int freq2 = 329;
 int tempo;
-
-
 int ledPin = 10;
+
+
+//Variables de control del puerto serial y generales
 String movement;
 String wordRecieved = "";
 int lastMove = 0;
 int totalMoves = 0;
 int movesQueue = 0;
-
 bool reTurnOn = false;
 bool UpDown = true;
+
 
 void setup() {
 
@@ -67,6 +68,9 @@ void loop() {
   metronomo();
 }
 
+/*
+ * Revisa mensajes en el puerto serial y acciona el procesador de mensajes al recoger una expresion completa
+ */
 void checkMessages(){
   
   if (Serial.available() > 0) {
@@ -93,6 +97,9 @@ void checkMessages(){
 
 }
 
+/*
+ * Procesa los mensajes recibidos, define el tempo y  acciona los movimientos con su respectivo metronomo
+ */
 void MessageProcessor(String message){
   
   if (message[0] == 'M'){
@@ -123,6 +130,9 @@ void MessageProcessor(String message){
   }
 }
 
+/*
+ * Procesa y acciona los movimientos segun el metronomo definido por el usuario 
+ */
 void metronomo(){
 
   if (metroMode && movement != ""){
@@ -146,7 +156,9 @@ void metronomo(){
   
 }
 
-
+/*
+ * Realiza el movimiento solicitado por el usuario
+ */
 void performMovement(){
   Serial.println("Se procede a ejecutar el movimiento: ");
 
@@ -171,6 +183,10 @@ void performMovement(){
   }
   
 }
+
+/*
+ * Retorna un movimiento dado a su posicion inicial despues de una ejecucion dada
+ */
 void returnMoves(){
   if (movement[lastMove-1] == 'A' || movement[lastMove-1] == 'B'){
     servoEje1.write(90);
