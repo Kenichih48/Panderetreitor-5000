@@ -4,8 +4,6 @@ Golpe();
 Abanico(A);
 Vertical(D);
 Vertical(I);
-Percutor(AB);
 Percutor(I);
 };
-
 

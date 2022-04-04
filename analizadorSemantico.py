@@ -2135,7 +2135,7 @@ def execRutinas(id, parameters, line):
         elif key == id and len(parametersTemp) > len(value[0]):
             errorList.append(["Error semantico, la rutina %s necesita menos parametros de los brindados" % id, line])
         elif key == id and len(parametersTemp) < len(value[0]):
-            errorList.append(["Error semantico, la rutina necesita mas parametros de los brindados" % id, line])
+            errorList.append(["Error semantico, la rutina %s necesita mas parametros de los brindados" % id, line])
         elif key != id:
             pass     
         else:

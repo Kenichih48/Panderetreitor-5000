@@ -11,7 +11,7 @@ class ArduinoHandler:
         self.start()
 
     def start(self):
-        self.arduinoData = serial.Serial('com5', baudrate= 9600,timeout=1)
+        self.arduinoData = serial.Serial('/dev/ttyACM0', baudrate= 9600,timeout=1)
         time.sleep(3)
         
 
@@ -45,14 +45,9 @@ class ArduinoHandler:
             self.arduinoData.write(pil.encode())
             i1+=1
 
-
-arduino = ArduinoHandler()
-arduino.add_metronome("M1/2")
-arduino.add_pila("DDII")
-arduino.add_metronome("M1/3")
-arduino.add_pila("GGDI")
-print(arduino.pila,arduino.metronome)
-arduino.send_data()
+    def reset(self):
+        self.metronome = []
+        self.pila = []
 
 
 

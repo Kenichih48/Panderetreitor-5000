@@ -144,7 +144,7 @@ def comp():
 Definicion de funcion: Accion del boton de abrir archivo que redirecciona al buscador
 '''
 def open_file():
-    path = askopenfilename(filetypes=[('Text Files','*.txt')])
+    path = askopenfilename(filetypes=[('Text Files','*.pl0')])
     if path != '':
         with open(path, 'r') as file:
             code = file.read()

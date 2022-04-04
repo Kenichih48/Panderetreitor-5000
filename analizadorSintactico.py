@@ -469,7 +469,7 @@ def buscarFicheros(directorio):
 	return files[int(numArchivo)-1]
 
 def run():
-    directorio = '/home/kash/Documents/GitHub/Tambarduine/'
+    directorio = '/home/david/Documents/GitHub/Tambarduine/'
     archivo = 'temp.pl0'
     test = directorio+archivo
     fp = codecs.open(test,"r","utf-8")
@@ -481,4 +481,4 @@ def run():
 
     print (result)
 
-run()
+#run()
